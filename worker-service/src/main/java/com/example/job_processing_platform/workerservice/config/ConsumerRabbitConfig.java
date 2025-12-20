@@ -1,20 +1,22 @@
 package com.example.job_processing_platform.workerservice.config;
 
 import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
-import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 
 @Configuration
 public class ConsumerRabbitConfig {
 
-    public static final String JOB_QUEUE = "job.queue";
-    public static final String JOB_EXCHANGE = "job.exchange";
-    public static final String JOB_ROUTING_KEY = "job.routing.key";
+    private final ConsumerJobPlatformProperties properties;
+
+    public ConsumerRabbitConfig(ConsumerJobPlatformProperties properties) {
+        this.properties = properties;
+    }
 
     @Bean
     public Jackson2JsonMessageConverter consumerJacksonMessageConverter() {
@@ -37,12 +39,14 @@ public class ConsumerRabbitConfig {
 
     @Bean
     public Queue consumerJobQueue() {
-        return QueueBuilder.durable(JOB_QUEUE).build();
+        return QueueBuilder
+                .durable(properties.getRabbit().getQueue())
+                .build();
     }
 
     @Bean
     public DirectExchange consumerJobExchange() {
-        return new DirectExchange(JOB_EXCHANGE);
+        return new DirectExchange(properties.getRabbit().getExchange());
     }
 
     @Bean
@@ -50,6 +54,21 @@ public class ConsumerRabbitConfig {
         return BindingBuilder
                 .bind(consumerJobQueue())
                 .to(consumerJobExchange())
-                .with(JOB_ROUTING_KEY);
+                .with(properties.getRabbit().getRoutingKey());
+    }
+
+    @Bean
+    public Queue consumerLogQueue() {
+        return QueueBuilder
+                .durable(properties.getRabbit().getLogQueue())
+                .build();
+    }
+
+    @Bean
+    public Binding consumerLogBinding() {
+        return BindingBuilder
+                .bind(consumerLogQueue())
+                .to(consumerJobExchange())
+                .with(properties.getRabbit().getLogRoutingKey());
     }
 }

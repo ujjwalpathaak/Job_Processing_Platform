@@ -20,24 +20,15 @@ public class JobConsumer {
             containerFactory = "rabbitListenerContainerFactory"
     )
     public void consume(ConsumerJobMessage message) {
-
         JobHandler handler = handlers.stream()
-                .filter(h -> h.getJobType().equals(message.getType()))
+                .filter(h -> h.identify().equals(message.jobType))
                 .findFirst()
                 .orElseThrow(() ->
                         new IllegalStateException(
-                                "No JobHandler found for type: " + message.getType()
+                                "No JobHandler found for type: " + message.jobType
                         )
                 );
 
         handler.handle(message);
-    }
-
-    private void processEmailJob(ConsumerJobMessage message) {
-        System.out.println("Processing EMAIL job: " + message.getId());
-    }
-
-    private void processPdfJob(ConsumerJobMessage message) {
-        System.out.println("Processing PDF job: " + message.getId());
     }
 }

@@ -1,17 +1,17 @@
 package com.example.job_processing_platform.jobservice.producer;
 
 import com.example.job_processing_platform.jobservice.config.JobPlatformProperties;
-import com.example.job_processing_platform.jobservice.dto.JobMessage;
+import com.example.job_processing_platform.jobservice.dto.LogMessage;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
-public class JobProducer {
+public class LogProducer {
 
     private final RabbitTemplate rabbitTemplate;
     private final JobPlatformProperties properties;
 
-    public JobProducer(
+    public LogProducer(
             RabbitTemplate rabbitTemplate,
             JobPlatformProperties properties
     ) {
@@ -19,10 +19,10 @@ public class JobProducer {
         this.properties = properties;
     }
 
-    public void publish(JobMessage message) {
+    public void publish(LogMessage message) {
         rabbitTemplate.convertAndSend(
-                properties.getRabbit().getExchange(),
-                properties.getRabbit().getRoutingKey(),
+                properties.getRabbit().getLogQueue(),
+                properties.getRabbit().getLogRoutingKey(),
                 message
         );
     }
