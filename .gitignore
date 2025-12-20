@@ -1,0 +1,71 @@
+# Maven
+target/
+*.log
+
+# IntelliJ
+.idea/
+*.iml
+
+mvnw
+mvnw.cmd
+**/.mvn/
+
+# OS
+.DS_Store
+
+# Env
+.env
+
+############################################
+# Global
+############################################
+
+HELP.md
+
+############################################
+# Maven / Build (all modules)
+############################################
+
+**/target/
+!.**/src/main/**/target/
+!.**/src/test/**/target/
+
+**/.mvn/wrapper/maven-wrapper.jar
+
+
+############################################
+# Spring Tool Suite (STS)
+############################################
+
+**/.apt_generated
+**/.classpath
+**/.factorypath
+**/.project
+**/.settings
+**/.springBeans
+**/.sts4-cache
+
+
+############################################
+# IntelliJ IDEA
+############################################
+
+**/.idea
+**/*.iws
+**/*.iml
+**/*.ipr
+
+
+############################################
+# NetBeans
+############################################
+
+**/nbproject/private/
+**/nbbuild/
+**/dist/
+**/nbdist/
+**/.nb-gradle/
+
+**/build/
+!.**/src/main/**/build/
+!.**/src/test/**/build/
