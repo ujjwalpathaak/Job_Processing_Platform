@@ -1,9 +1,9 @@
-package com.example.job_processing_platform.jobservice.config;
+package com.example.job_processing_platform.config;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@EnableConfigurationProperties(JobPlatformProperties.class)
+@EnableConfigurationProperties(com.example.job_processing_platform.config.JobPlatformProperties.class)
 public class JobPlatformAutoConfig {
 }

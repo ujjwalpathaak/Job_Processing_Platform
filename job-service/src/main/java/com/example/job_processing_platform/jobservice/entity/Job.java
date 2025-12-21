@@ -1,6 +1,6 @@
 package com.example.job_processing_platform.jobservice.entity;
 
-import com.example.job_processing_platform.jobservice.enums.JobStatus;
+import com.example.job_processing_platform.enums.JobStatus;
 import jakarta.persistence.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;

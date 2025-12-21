@@ -1,6 +1,4 @@
-package com.example.job_processing_platform.jobservice.dto;
-
-import com.example.job_processing_platform.jobservice.entity.Job;
+package com.example.job_processing_platform.dto;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -11,7 +9,8 @@ public class JobMessage implements Serializable {
     private String jobType;
     private Map<String, Object> data;
 
-    public JobMessage() {}
+    public JobMessage() {
+    }
 
     public Long getJobId() {
         return jobId;
@@ -25,9 +24,9 @@ public class JobMessage implements Serializable {
         return data;
     }
 
-    public JobMessage(Job job) {
-        this.jobId = job.getId();
-        this.jobType = job.getType();
-        this.data = job.getData();
+    public JobMessage(Long jobId, String jobType, Map<String, Object> data) {
+        this.jobId = jobId;
+        this.jobType = jobType;
+        this.data = data;
     }
 }

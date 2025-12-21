@@ -1,9 +1,9 @@
-package com.example.job_processing_platform.workerservice.config;
+package com.example.job_processing_platform.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "job.platform")
-public class ConsumerJobPlatformProperties {
+public class JobPlatformProperties {
 
     private String serviceName;
     private int maxRetries;
@@ -59,7 +59,7 @@ public class ConsumerJobPlatformProperties {
             this.logRoutingKey = logRoutingKey;
         }
     }
-    
+
     public String getServiceName() {
         return serviceName;
     }

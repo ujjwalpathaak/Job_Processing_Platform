@@ -1,9 +1,9 @@
 package com.example.job_processing_platform.jobservice.service;
 
-import com.example.job_processing_platform.jobservice.dto.JobMessage;
-import com.example.job_processing_platform.jobservice.dto.LogMessage;
+import com.example.job_processing_platform.dto.JobMessage;
+import com.example.job_processing_platform.dto.LogMessage;
+import com.example.job_processing_platform.interfaces.JobManager;
 import com.example.job_processing_platform.jobservice.entity.Job;
-import com.example.job_processing_platform.jobservice.interfaces.JobManager;
 import com.example.job_processing_platform.jobservice.producer.JobProducer;
 import com.example.job_processing_platform.jobservice.producer.LogProducer;
 import com.example.job_processing_platform.jobservice.repository.JobRepository;
@@ -60,7 +60,11 @@ public class JobService implements JobManager {
     }
 
     private void publishJob(Job job) {
-        JobMessage jobMessage = new JobMessage(job);
+        Long jobId = job.getId();
+        String jobType = job.getType();
+        Map<String, Object> data = job.getData();
+
+        JobMessage jobMessage = new JobMessage(jobId, jobType, data);
         jobProducer.publish(jobMessage);
     }
 }

@@ -1,4 +1,4 @@
-package com.example.job_processing_platform.workerservice.config;
+package com.example.job_processing_platform.config;
 
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
@@ -10,11 +10,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class ConsumerRabbitConfig {
+public class RabbitConfig {
 
-    private final ConsumerJobPlatformProperties properties;
+    private final JobPlatformProperties properties;
 
-    public ConsumerRabbitConfig(ConsumerJobPlatformProperties properties) {
+    public RabbitConfig(JobPlatformProperties properties) {
         this.properties = properties;
     }
 

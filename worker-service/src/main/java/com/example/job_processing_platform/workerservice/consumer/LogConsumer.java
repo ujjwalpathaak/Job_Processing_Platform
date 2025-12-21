@@ -1,6 +1,6 @@
 package com.example.job_processing_platform.workerservice.consumer;
 
-import com.example.job_processing_platform.workerservice.dto.ConsumerLogMessage;
+import com.example.job_processing_platform.dto.LogMessage;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +13,7 @@ public class LogConsumer {
             queues = "${job.platform.rabbit.log-queue}",
             containerFactory = "rabbitListenerContainerFactory"
     )
-    public void consume(ConsumerLogMessage message) {
+    public void consume(LogMessage message) {
         System.out.println(message);
     }
 }

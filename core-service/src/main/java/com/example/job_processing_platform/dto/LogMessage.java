@@ -1,4 +1,4 @@
-package com.example.job_processing_platform.jobservice.dto;
+package com.example.job_processing_platform.dto;
 
 import java.time.Instant;
 

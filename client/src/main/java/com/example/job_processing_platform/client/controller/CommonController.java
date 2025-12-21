@@ -3,10 +3,12 @@ package com.example.job_processing_platform.client.controller;
 import com.example.job_processing_platform.client.dto.EmailJobRequest;
 import com.example.job_processing_platform.client.handlers.EmailHandler;
 import com.example.job_processing_platform.jobservice.entity.Job;
-import com.example.job_processing_platform.jobservice.interfaces.JobManager;
 import com.example.job_processing_platform.jobservice.service.JobService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +39,7 @@ public class CommonController {
     }
 
     @GetMapping("/jobs")
-    public ResponseEntity<List<Job>> getJobs(){
+    public ResponseEntity<List<Job>> getJobs() {
         List<Job> jobs = jobManager.getAllJobs();
         return ResponseEntity.ok().body(jobs);
     }

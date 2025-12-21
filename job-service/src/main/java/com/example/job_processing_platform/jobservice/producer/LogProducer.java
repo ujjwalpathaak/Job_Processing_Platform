@@ -1,7 +1,7 @@
 package com.example.job_processing_platform.jobservice.producer;
 
-import com.example.job_processing_platform.jobservice.config.JobPlatformProperties;
-import com.example.job_processing_platform.jobservice.dto.LogMessage;
+import com.example.job_processing_platform.config.JobPlatformProperties;
+import com.example.job_processing_platform.dto.LogMessage;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 

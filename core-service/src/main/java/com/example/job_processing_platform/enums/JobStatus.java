@@ -1,4 +1,4 @@
-package com.example.job_processing_platform.workerservice.enums;
+package com.example.job_processing_platform.enums;
 
 public enum JobStatus {
     SCHEDULED,
