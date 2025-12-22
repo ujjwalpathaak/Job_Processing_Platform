@@ -1,11 +1,11 @@
 package com.example.job_processing_platform.jobservice;
 
-import com.example.job_processing_platform.config.AutoConfig;
+import com.example.job_processing_platform.config.RabbitAutoConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Import;
 
-@Import(AutoConfig.class)
+@Import(RabbitAutoConfig.class)
 @SpringBootApplication
 public class JobServiceApplication {
 

@@ -11,10 +11,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitConfig {
 
-    private final Properties properties;
+    private final RabbitProperties rabbitProperties;
 
-    public RabbitConfig(Properties properties) {
-        this.properties = properties;
+    public RabbitConfig(RabbitProperties rabbitProperties) {
+        this.rabbitProperties = rabbitProperties;
     }
 
     @Bean
@@ -31,19 +31,19 @@ public class RabbitConfig {
                 new SimpleRabbitListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory);
         factory.setMessageConverter(converter);
-        factory.setAcknowledgeMode(AcknowledgeMode.AUTO);
+        factory.setAcknowledgeMode(AcknowledgeMode.MANUAL);
         return factory;
     }
 
     @Bean
     public DirectExchange exchange() {
-        return new DirectExchange(properties.getRabbit().getExchange());
+        return new DirectExchange(rabbitProperties.getRabbit().getExchange());
     }
 
     @Bean
     public Queue jobQueue() {
         return QueueBuilder
-                .durable(properties.getRabbit().getQueue())
+                .durable(rabbitProperties.getRabbit().getQueue())
                 .build();
     }
 
@@ -52,13 +52,13 @@ public class RabbitConfig {
         return BindingBuilder
                 .bind(jobQueue())
                 .to(exchange())
-                .with(properties.getRabbit().getRoutingKey());
+                .with(rabbitProperties.getRabbit().getRoutingKey());
     }
 
     @Bean
     public Queue logQueue() {
         return QueueBuilder
-                .durable(properties.getRabbit().getLogQueue())
+                .durable(rabbitProperties.getRabbit().getLogQueue())
                 .build();
     }
 
@@ -67,6 +67,6 @@ public class RabbitConfig {
         return BindingBuilder
                 .bind(logQueue())
                 .to(exchange())
-                .with(properties.getRabbit().getLogRoutingKey());
+                .with(rabbitProperties.getRabbit().getLogRoutingKey());
     }
 }
