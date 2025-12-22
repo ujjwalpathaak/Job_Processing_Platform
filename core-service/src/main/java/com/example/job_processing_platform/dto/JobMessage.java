@@ -9,9 +9,6 @@ public class JobMessage implements Serializable {
     private String jobType;
     private Map<String, Object> data;
 
-    public JobMessage() {
-    }
-
     public Long getJobId() {
         return jobId;
     }
@@ -22,6 +19,9 @@ public class JobMessage implements Serializable {
 
     public Map<String, Object> getData() {
         return data;
+    }
+
+    public JobMessage() {
     }
 
     public JobMessage(Long jobId, String jobType, Map<String, Object> data) {

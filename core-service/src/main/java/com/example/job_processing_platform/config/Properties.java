@@ -3,7 +3,7 @@ package com.example.job_processing_platform.config;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "job.platform")
-public class JobPlatformProperties {
+public class Properties {
 
     private String serviceName;
     private int maxRetries;

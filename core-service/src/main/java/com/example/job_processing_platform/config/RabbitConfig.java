@@ -5,28 +5,26 @@ import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFacto
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitConfig {
 
-    private final JobPlatformProperties properties;
+    private final Properties properties;
 
-    public RabbitConfig(JobPlatformProperties properties) {
+    public RabbitConfig(Properties properties) {
         this.properties = properties;
     }
 
     @Bean
-    public Jackson2JsonMessageConverter consumerJacksonMessageConverter() {
+    public Jackson2JsonMessageConverter jacksonMessageConverter() {
         return new Jackson2JsonMessageConverter();
     }
 
     @Bean
     public RabbitListenerContainerFactory<?> rabbitListenerContainerFactory(
             ConnectionFactory connectionFactory,
-            @Qualifier("consumerJacksonMessageConverter")
             Jackson2JsonMessageConverter converter
     ) {
         SimpleRabbitListenerContainerFactory factory =
@@ -38,37 +36,37 @@ public class RabbitConfig {
     }
 
     @Bean
-    public Queue consumerJobQueue() {
+    public DirectExchange exchange() {
+        return new DirectExchange(properties.getRabbit().getExchange());
+    }
+
+    @Bean
+    public Queue jobQueue() {
         return QueueBuilder
                 .durable(properties.getRabbit().getQueue())
                 .build();
     }
 
     @Bean
-    public DirectExchange consumerJobExchange() {
-        return new DirectExchange(properties.getRabbit().getExchange());
-    }
-
-    @Bean
-    public Binding consumerJobBinding() {
+    public Binding jobBinding() {
         return BindingBuilder
-                .bind(consumerJobQueue())
-                .to(consumerJobExchange())
+                .bind(jobQueue())
+                .to(exchange())
                 .with(properties.getRabbit().getRoutingKey());
     }
 
     @Bean
-    public Queue consumerLogQueue() {
+    public Queue logQueue() {
         return QueueBuilder
                 .durable(properties.getRabbit().getLogQueue())
                 .build();
     }
 
     @Bean
-    public Binding consumerLogBinding() {
+    public Binding logBinding() {
         return BindingBuilder
-                .bind(consumerLogQueue())
-                .to(consumerJobExchange())
+                .bind(logQueue())
+                .to(exchange())
                 .with(properties.getRabbit().getLogRoutingKey());
     }
 }

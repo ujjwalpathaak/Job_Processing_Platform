@@ -2,7 +2,6 @@ package com.example.job_processing_platform.jobservice.service;
 
 import com.example.job_processing_platform.dto.JobMessage;
 import com.example.job_processing_platform.dto.LogMessage;
-import com.example.job_processing_platform.interfaces.JobManager;
 import com.example.job_processing_platform.jobservice.entity.Job;
 import com.example.job_processing_platform.jobservice.producer.JobProducer;
 import com.example.job_processing_platform.jobservice.producer.LogProducer;
@@ -16,7 +15,7 @@ import java.util.Map;
 
 @Service
 @Primary
-public class JobService implements JobManager {
+public class JobService {
     private final JobRepository jobRepository;
     private final JobProducer jobProducer;
     private final LogProducer logProducer;
@@ -27,7 +26,6 @@ public class JobService implements JobManager {
         this.logProducer = logProducer;
     }
 
-    @Override
     public void execute(String type, Map<String, Object> data) {
         Job job = new Job(type, data);
         Job savedJob = jobRepository.save(job);
@@ -37,10 +35,9 @@ public class JobService implements JobManager {
         }
 
         publishJob(savedJob);
-        publishLog(savedJob.getId(), "New Job created");
+        publishLog(savedJob.getId(), savedJob.getType(), "New Job created");
     }
 
-    @Override
     public void schedule(String type, Map<String, Object> data, Instant scheduledAt) {
         Job job = new Job(type, data, scheduledAt);
         Job savedJob = jobRepository.save(job);
@@ -54,8 +51,8 @@ public class JobService implements JobManager {
         return jobRepository.findAll();
     }
 
-    private void publishLog(Long jobId, String message) {
-        LogMessage logMessage = new LogMessage(jobId, message);
+    private void publishLog(Long jobId, String jobType, String message) {
+        LogMessage logMessage = new LogMessage(jobId, jobType, message);
         logProducer.publish(logMessage);
     }
 

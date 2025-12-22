@@ -54,13 +54,16 @@
             <artifactId>job-service</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.example.job_processing_platform</groupId>
             <artifactId>worker-service</artifactId>
             <version>${project.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.example.job_processing_platform</groupId>
+            <artifactId>core-service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
