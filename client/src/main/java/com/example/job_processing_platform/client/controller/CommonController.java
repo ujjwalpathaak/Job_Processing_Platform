@@ -37,7 +37,7 @@ public class CommonController {
         data.put("subject", payload.subject);
         data.put("content", payload.content);
 
-        jobService.execute(emailHandler.identify(), data);
+        jobService.execute(emailHandler, data);
 
         return ResponseEntity.ok().build();
     }

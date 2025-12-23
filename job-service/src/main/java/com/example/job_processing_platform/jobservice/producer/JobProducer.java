@@ -1,8 +1,9 @@
 package com.example.job_processing_platform.jobservice.producer;
 
-import com.example.job_processing_platform.config.RabbitProperties;
 import com.example.job_processing_platform.dto.JobMessage;
+import com.example.job_processing_platform.enums.JobCategory;
 import com.example.job_processing_platform.interfaces.Producer;
+import com.example.job_processing_platform.jobservice.manager.QueueManager;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
@@ -10,18 +11,21 @@ import org.springframework.stereotype.Service;
 public class JobProducer implements Producer<JobMessage> {
 
     private final RabbitTemplate rabbitTemplate;
-    private final RabbitProperties rabbitProperties;
+    private final QueueManager queueManager;
 
-    public JobProducer(RabbitTemplate rabbitTemplate, RabbitProperties rabbitProperties) {
+    public JobProducer(RabbitTemplate rabbitTemplate, QueueManager queueManager) {
         this.rabbitTemplate = rabbitTemplate;
-        this.rabbitProperties = rabbitProperties;
+        this.queueManager = queueManager;
     }
 
     @Override
-    public void publish(JobMessage message) {
+    public void publish(JobMessage message, JobCategory jobCategory) {
+        String exchange = queueManager.getExchange(jobCategory);
+        String routingKey = queueManager.getRoutingKey(jobCategory);
+
         rabbitTemplate.convertAndSend(
-                rabbitProperties.getRabbit().getExchange(),
-                rabbitProperties.getRabbit().getRoutingKey(),
+                exchange,
+                routingKey,
                 message
         );
     }

@@ -26,13 +26,14 @@ public class JobConsumer implements Consumer<JobMessage> {
             containerFactory = "rabbitListenerContainerFactory"
     )
     public void consume(JobMessage message, Channel channel, Message raw) throws IOException {
-//        long tag = raw.getMessageProperties().getDeliveryTag();
+        long tag = raw.getMessageProperties().getDeliveryTag();
+        System.out.println(tag);
 //        channel.basicAck(tag, true);
-//        channel.basicNack(deliveryTag, false, true);
+//        channel.basicNack(tag, false, true);
 //        channel.basicReject(tag, false);
 
         JobHandler handler = handlers.stream()
-                .filter(h -> h.identify().equals(message.getJobType()))
+                .filter(h -> h.definition().identify().equals(message.getJobType()))
                 .findFirst()
                 .orElseThrow(() ->
                         new IllegalStateException(
@@ -41,6 +42,5 @@ public class JobConsumer implements Consumer<JobMessage> {
                 );
 
         handler.handle(message);
-
     }
 }

@@ -2,6 +2,7 @@ package com.example.job_processing_platform.jobservice.producer;
 
 import com.example.job_processing_platform.config.RabbitProperties;
 import com.example.job_processing_platform.dto.LogMessage;
+import com.example.job_processing_platform.enums.JobCategory;
 import com.example.job_processing_platform.interfaces.Producer;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,7 @@ public class LogProducer implements Producer<LogMessage> {
     }
 
     @Override
-    public void publish(LogMessage message) {
+    public void publish(LogMessage message, JobCategory jobCategory) {
         rabbitTemplate.convertAndSend(
                 rabbitProperties.getRabbit().getExchange(),
                 rabbitProperties.getRabbit().getLogRoutingKey(),
