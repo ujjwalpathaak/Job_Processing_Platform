@@ -6,21 +6,19 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class QueueManager {
-    private final RabbitProperties rabbitProperties;
+    private final RabbitProperties props;
 
     public QueueManager(RabbitProperties rabbitProperties) {
-        this.rabbitProperties = rabbitProperties;
+        this.props = rabbitProperties;
     }
 
-    public String getExchange(JobCategory jobCategory) {
-        return rabbitProperties.getRabbit().getStandardExchange();
+    public String getExchange() {
+        return props.getRabbit().getExchanges().get("standard");
     }
 
     public String getRoutingKey(JobCategory jobCategory) {
         return switch (jobCategory) {
-            case STANDARD -> rabbitProperties.getRabbit().getStandard().getRoutingKey();
-//            case EXTERNAL -> rabbitProperties.getRabbit().getSlow().getRoutingKey();
-//            case CRITICAL -> rabbitProperties.getRabbit().getCritical().getRoutingKey();
+            case STANDARD -> props.getRabbit().getStandard().getRoutingKey();
             case EXTERNAL -> null;
             case CRITICAL -> null;
         };

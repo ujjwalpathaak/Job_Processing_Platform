@@ -38,8 +38,8 @@ public class Job {
 
     public Job(JobHandler handler, Map<String, Object> data) {
         this.status = JobStatus.SCHEDULED;
-        this.jobCategory = handler.definition().category();
-        this.type = handler.definition().identify();
+        this.jobCategory = handler.category();
+        this.type = handler.identify();
         this.data = data;
         this.createdAt = Instant.now();
     }

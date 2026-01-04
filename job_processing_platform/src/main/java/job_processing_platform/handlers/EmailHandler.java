@@ -2,27 +2,36 @@ package job_processing_platform.handlers;
 
 import job_processing_platform.dto.JobMessage;
 import job_processing_platform.enums.JobCategory;
-import job_processing_platform.interfaces.JobDefinition;
-import job_processing_platform.interfaces.JobHandler;
 import org.springframework.stereotype.Component;
 
-@Component
-public class EmailHandler implements JobHandler {
-    @Override
-    public JobDefinition definition() {
-        return new JobDefinition() {
-            public String identify() {
-                return "EMAIL_HANDLER";
-            }
+import java.util.List;
 
-            public JobCategory category() {
-                return JobCategory.STANDARD;
-            }
-        };
+@Component
+public class EmailHandler extends AbstractJobHandler {
+
+    @Override
+    public String identify() {
+        return "EMAIL_HANDLER";
     }
 
     @Override
-    public void handle(JobMessage message) {
-        System.out.println("Email Sent");
+    public JobCategory category() {
+        return JobCategory.STANDARD;
+    }
+
+    @Override
+    public int retries() {
+        return 3;
+    }
+
+    @Override
+    public List<String> backoff() {
+        return List.of("10s", "4s", "2s");
+    }
+
+    @Override
+    protected void execute(JobMessage message) {
+        throw new RuntimeException("TEST FAILURE");
+        // actual email logic
     }
 }

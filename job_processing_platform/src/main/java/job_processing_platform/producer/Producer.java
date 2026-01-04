@@ -18,7 +18,7 @@ public class Producer {
     }
 
     public void publish(Message message, JobCategory jobCategory) {
-        String exchange = queueManager.getExchange(jobCategory);
+        String exchange = queueManager.getExchange();
         String routingKey = queueManager.getRoutingKey(jobCategory);
 
         rabbitTemplate.convertAndSend(

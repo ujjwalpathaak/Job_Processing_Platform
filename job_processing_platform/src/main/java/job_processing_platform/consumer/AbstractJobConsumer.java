@@ -1,41 +1,74 @@
 package job_processing_platform.consumer;
 
 import com.rabbitmq.client.Channel;
+import job_processing_platform.config.RabbitProperties;
 import job_processing_platform.dto.JobMessage;
-import job_processing_platform.interfaces.Consumer;
 import job_processing_platform.interfaces.JobHandler;
+import job_processing_platform.utils.JobHandlerRegistry;
+import job_processing_platform.utils.RetryHelper;
 import org.springframework.amqp.core.Message;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
-import java.io.IOException;
-import java.util.List;
+public abstract class AbstractJobConsumer {
 
-public abstract class AbstractJobConsumer implements Consumer<JobMessage> {
+    protected final RabbitTemplate rabbitTemplate;
+    protected final RabbitProperties rabbitProperties;
+    protected final JobHandlerRegistry jobHandlerRegistry;
 
-    protected final List<JobHandler> handlers;
-
-    protected AbstractJobConsumer(List<JobHandler> handlers) {
-        this.handlers = handlers;
+    public AbstractJobConsumer(
+            RabbitTemplate rabbitTemplate,
+            RabbitProperties rabbitProperties,
+            JobHandlerRegistry jobHandlerRegistry
+    ) {
+        this.rabbitTemplate = rabbitTemplate;
+        this.rabbitProperties = rabbitProperties;
+        this.jobHandlerRegistry = jobHandlerRegistry;
     }
 
-    protected void process(JobMessage message, Channel channel, Message raw) throws IOException {
-        long tag = raw.getMessageProperties().getDeliveryTag();
+    protected void consumeInternal(
+            JobMessage job,
+            Message raw,
+            Channel channel,
+            RabbitProperties.Queue queueConfig,
+            String exchange
+    ) throws Exception {
 
-        JobHandler handler = handlers.stream()
-                .filter(h -> h.definition().identify().equals(message.getJobType()))
-                .findFirst()
-                .orElseThrow(() ->
-                        new IllegalStateException(
-                                "No JobHandler found for type: " + message.getJobType()
-                        )
-                );
+        long tag = raw.getMessageProperties().getDeliveryTag();
+        JobHandler handler = jobHandlerRegistry.get(job.getJobType());
 
         try {
-            handler.handle(message);
+            handler.process(job);
             channel.basicAck(tag, false);
-        } catch (Exception e) {
-            // retry / DLQ logic handled by broker bindings
-            channel.basicNack(tag, false, false);
-            throw e;
+
+        } catch (Exception ex) {
+
+            int retryCount = RetryHelper.getRetryCount(raw);
+
+            if (!RetryHelper.shouldRetry(handler, retryCount)) {
+                rabbitTemplate.convertAndSend(
+                        exchange,
+                        queueConfig.getDlqRoutingKey(),
+                        job
+                );
+                channel.basicAck(tag, false);
+                return;
+            }
+
+            RabbitProperties.Retry retry =
+                    RetryHelper.resolveRetryQueue(handler, rabbitProperties, retryCount);
+
+            rabbitTemplate.convertAndSend(
+                    retry.getQueue(),
+                    retry.getRoutingKey(),
+                    job,
+                    m -> {
+                        m.getMessageProperties().getHeaders()
+                                .put(RetryHelper.RETRY_HEADER, retryCount + 1);
+                        return m;
+                    }
+            );
+
+            channel.basicAck(tag, false);
         }
     }
 }

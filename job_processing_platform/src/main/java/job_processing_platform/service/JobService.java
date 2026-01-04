@@ -25,7 +25,7 @@ public class JobService {
 
     public void execute(JobHandler handler, Map<String, Object> data) {
         Job job = jobRepository.save(new Job(handler, data));
-        JobCategory jobCategory = handler.definition().category();
+        JobCategory jobCategory = handler.category();
 
         if (job.getId() == null) {
             throw new IllegalStateException("Error creating a new job");

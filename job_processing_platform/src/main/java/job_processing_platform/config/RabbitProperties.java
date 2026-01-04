@@ -2,6 +2,9 @@ package job_processing_platform.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @ConfigurationProperties(prefix = "job.platform")
 public class RabbitProperties {
 
@@ -13,29 +16,47 @@ public class RabbitProperties {
 
     public static class Rabbit {
 
-        private String standardExchange;
-        private final Standard standard = new Standard();
+        private Map<String, String> exchanges = new HashMap<>();
 
-        public String getStandardExchange() {
-            return standardExchange;
+        private final Queue standard = new Queue();
+        private final Queue critical = new Queue();
+        private final Queue external = new Queue();
+
+        private Map<String, Retry> retries = new HashMap<>();
+
+        public Map<String, String> getExchanges() {
+            return exchanges;
         }
 
-        public void setStandardExchange(String standardExchange) {
-            this.standardExchange = standardExchange;
+        public void setExchanges(Map<String, String> exchanges) {
+            this.exchanges = exchanges;
         }
 
-        public Standard getStandard() {
+        public Queue getStandard() {
             return standard;
+        }
+
+        public Queue getCritical() {
+            return critical;
+        }
+
+        public Queue getExternal() {
+            return external;
+        }
+
+        public Map<String, Retry> getRetries() {
+            return retries;
+        }
+
+        public void setRetries(Map<String, Retry> retries) {
+            this.retries = retries;
         }
     }
 
-    public static class Standard {
+    public static class Queue {
 
         private String queue;
         private String routingKey;
-
-        private final Retry retry30s = new Retry();
-
         private String dlq;
         private String dlqRoutingKey;
 
@@ -53,10 +74,6 @@ public class RabbitProperties {
 
         public void setRoutingKey(String routingKey) {
             this.routingKey = routingKey;
-        }
-
-        public Retry getRetry30s() {
-            return retry30s;
         }
 
         public String getDlq() {
