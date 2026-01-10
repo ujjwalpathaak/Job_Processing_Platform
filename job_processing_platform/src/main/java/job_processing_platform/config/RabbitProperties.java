@@ -1,5 +1,6 @@
 package job_processing_platform.config;
 
+import job_processing_platform.enums.JobCategory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.HashMap;
@@ -16,19 +17,17 @@ public class RabbitProperties {
 
     public static class Rabbit {
 
-        private Map<String, String> exchanges = new HashMap<>();
-
         private final Queue standard = new Queue();
         private final Queue critical = new Queue();
         private final Queue external = new Queue();
-
+        private Map<JobCategory, String> exchanges = new HashMap<>();
         private Map<String, Retry> retries = new HashMap<>();
 
-        public Map<String, String> getExchanges() {
+        public Map<JobCategory, String> getExchanges() {
             return exchanges;
         }
 
-        public void setExchanges(Map<String, String> exchanges) {
+        public void setExchanges(Map<JobCategory, String> exchanges) {
             this.exchanges = exchanges;
         }
 

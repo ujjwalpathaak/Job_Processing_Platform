@@ -8,6 +8,12 @@ import java.util.List;
 
 @Component
 public class EmailHandler extends AbstractJobHandler {
+    //  validate
+    //  beforeExecute
+    //  beforeExecute
+    //  execute
+    //  afterExecute
+    //  onFailure
 
     @Override
     public String identify() {

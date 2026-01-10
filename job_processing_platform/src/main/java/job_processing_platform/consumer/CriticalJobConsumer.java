@@ -3,6 +3,7 @@ package job_processing_platform.consumer;
 import com.rabbitmq.client.Channel;
 import job_processing_platform.config.RabbitProperties;
 import job_processing_platform.dto.JobMessage;
+import job_processing_platform.enums.JobCategory;
 import job_processing_platform.utils.JobHandlerRegistry;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -21,7 +22,7 @@ public class CriticalJobConsumer extends AbstractJobConsumer {
     }
 
     @RabbitListener(
-            queues = "#{rabbitProperties.rabbit.critical.queue}",
+            queues = "${job.platform.rabbit.critical.queue}",
             containerFactory = "rabbitListenerContainerFactory"
     )
     public void consume(JobMessage job, Message raw, Channel channel)
@@ -32,7 +33,7 @@ public class CriticalJobConsumer extends AbstractJobConsumer {
                 raw,
                 channel,
                 rabbitProperties.getRabbit().getCritical(),
-                rabbitProperties.getRabbit().getExchanges().get("critical")
+                rabbitProperties.getRabbit().getExchanges().get(JobCategory.CRITICAL)
         );
     }
 }

@@ -1,5 +1,6 @@
 package job_processing_platform.config;
 
+import job_processing_platform.enums.JobCategory;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -46,21 +47,21 @@ public class RabbitConfig {
     @Bean
     public DirectExchange standardExchange() {
         return new DirectExchange(
-                props.getRabbit().getExchanges().get("standard")
+                props.getRabbit().getExchanges().get(JobCategory.STANDARD)
         );
     }
 
     @Bean
     public DirectExchange criticalExchange() {
         return new DirectExchange(
-                props.getRabbit().getExchanges().get("critical")
+                props.getRabbit().getExchanges().get(JobCategory.CRITICAL)
         );
     }
 
     @Bean
     public DirectExchange externalExchange() {
         return new DirectExchange(
-                props.getRabbit().getExchanges().get("external")
+                props.getRabbit().getExchanges().get(JobCategory.EXTERNAL)
         );
     }
 
@@ -71,7 +72,7 @@ public class RabbitConfig {
     public Queue standardQueue() {
         return mainQueue(
                 props.getRabbit().getStandard(),
-                props.getRabbit().getExchanges().get("standard")
+                props.getRabbit().getExchanges().get(JobCategory.STANDARD)
         );
     }
 
@@ -79,7 +80,7 @@ public class RabbitConfig {
     public Queue criticalQueue() {
         return mainQueue(
                 props.getRabbit().getCritical(),
-                props.getRabbit().getExchanges().get("critical")
+                props.getRabbit().getExchanges().get(JobCategory.CRITICAL)
         );
     }
 
@@ -87,7 +88,7 @@ public class RabbitConfig {
     public Queue externalQueue() {
         return mainQueue(
                 props.getRabbit().getExternal(),
-                props.getRabbit().getExchanges().get("external")
+                props.getRabbit().getExchanges().get(JobCategory.EXTERNAL)
         );
     }
 

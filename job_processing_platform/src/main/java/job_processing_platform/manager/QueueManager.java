@@ -13,7 +13,7 @@ public class QueueManager {
     }
 
     public String getExchange() {
-        return props.getRabbit().getExchanges().get("standard");
+        return props.getRabbit().getExchanges().get(JobCategory.STANDARD);
     }
 
     public String getRoutingKey(JobCategory jobCategory) {
