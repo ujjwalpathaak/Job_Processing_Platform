@@ -1,6 +1,6 @@
 package job_processing_platform.manager;
 
-import job_processing_platform.config.RabbitProperties;
+import job_processing_platform.config.Rabbit.RabbitProperties;
 import job_processing_platform.enums.JobCategory;
 import org.springframework.stereotype.Component;
 

@@ -3,7 +3,7 @@ package job_processing_platform.service;
 import job_processing_platform.dto.JobMessage;
 import job_processing_platform.entity.Job;
 import job_processing_platform.enums.JobCategory;
-import job_processing_platform.handlers.AbstractJobHandler;
+import job_processing_platform.handlers.job.AbstractJobHandler;
 import job_processing_platform.producer.Producer;
 import job_processing_platform.repository.JobRepository;
 import org.springframework.context.annotation.Primary;

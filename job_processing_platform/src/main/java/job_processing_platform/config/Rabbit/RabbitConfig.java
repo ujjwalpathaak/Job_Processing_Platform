@@ -1,4 +1,4 @@
-package job_processing_platform.config;
+package job_processing_platform.config.Rabbit;
 
 import job_processing_platform.enums.JobCategory;
 import org.springframework.amqp.core.*;

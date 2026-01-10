@@ -1,4 +1,4 @@
-package job_processing_platform.utils;
+package job_processing_platform.registry;
 
 import jakarta.annotation.PostConstruct;
 

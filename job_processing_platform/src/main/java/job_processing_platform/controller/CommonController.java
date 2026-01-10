@@ -2,7 +2,7 @@ package job_processing_platform.controller;
 
 import job_processing_platform.dto.EmailJobRequest;
 import job_processing_platform.entity.Job;
-import job_processing_platform.handlers.EmailHandler;
+import job_processing_platform.handlers.job.EmailHandler;
 import job_processing_platform.service.JobService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

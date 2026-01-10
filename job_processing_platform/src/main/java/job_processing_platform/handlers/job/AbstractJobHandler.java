@@ -1,4 +1,4 @@
-package job_processing_platform.handlers;
+package job_processing_platform.handlers.job;
 
 import job_processing_platform.dto.JobMessage;
 import job_processing_platform.interfaces.JobHandler;

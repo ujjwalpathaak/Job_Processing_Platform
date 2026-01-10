@@ -1,6 +1,6 @@
-package job_processing_platform.utils;
+package job_processing_platform.helpers;
 
-import job_processing_platform.config.RabbitProperties;
+import job_processing_platform.config.Rabbit.RabbitProperties;
 import job_processing_platform.interfaces.JobHandler;
 import org.springframework.amqp.core.Message;
 

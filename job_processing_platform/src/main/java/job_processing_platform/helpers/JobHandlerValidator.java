@@ -1,4 +1,4 @@
-package job_processing_platform.utils;
+package job_processing_platform.helpers;
 
 import job_processing_platform.interfaces.JobHandler;
 

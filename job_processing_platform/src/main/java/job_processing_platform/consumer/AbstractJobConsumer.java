@@ -1,11 +1,11 @@
 package job_processing_platform.consumer;
 
 import com.rabbitmq.client.Channel;
-import job_processing_platform.config.RabbitProperties;
+import job_processing_platform.config.Rabbit.RabbitProperties;
 import job_processing_platform.dto.JobMessage;
+import job_processing_platform.helpers.RetryHelper;
 import job_processing_platform.interfaces.JobHandler;
-import job_processing_platform.utils.JobHandlerRegistry;
-import job_processing_platform.utils.RetryHelper;
+import job_processing_platform.registry.JobHandlerRegistry;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
