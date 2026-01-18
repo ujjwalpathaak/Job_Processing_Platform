@@ -52,12 +52,12 @@ public class JobService {
             }
             JobMessage jobMessage = new JobMessage(job.getId(), job.getJobCategory(), handlerType, data);
 
-            log.info("Created new job | handler: {}, category: {}, backoff: {}, retries: {}", handler.identify(), handler.category(), handler.backoff(), handler.retries());
+            log.info("{} - CREATED NEW JOB - handler: {}, category: {}, backoffs: {}, retries: {}", job.getId(), handler.identify(), handler.category(), handler.backoff(), handler.retries());
 
             producer.publish(job, jobMessage);
         } catch (Exception ex) {
             log.error(
-                    "Job creation failed | handler={} payload={} error={}",
+                    "Job creation failed for handler {} with payload {} because of the error = {}",
                     handlerType,
                     payload,
                     ex.toString()

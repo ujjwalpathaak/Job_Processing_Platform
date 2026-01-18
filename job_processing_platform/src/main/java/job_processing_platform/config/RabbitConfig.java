@@ -103,21 +103,64 @@ public class RabbitConfig {
     // =================================================
     // SHARED RETRY QUEUES
     // =================================================
+//    @Bean
+//    public Declarables retryQueues() {
+//        Declarables declarables = new Declarables();
+//
+//        props.getRabbit().getRetries().forEach((key, retry) -> {
+//            Queue queue = QueueBuilder
+//                    .durable(retry.getQueue())
+//                    .withArgument("x-message-ttl", retry.getTtl())
+//                    .build();
+//
+//            declarables.getDeclarables().add(queue);
+//        });
+//
+//        return declarables;
+//    }
+    // =================================================
+// SHARED RETRY QUEUES (DELAY + ROUTE)
+// =================================================
     @Bean
     public Declarables retryQueues() {
         Declarables declarables = new Declarables();
 
         props.getRabbit().getRetries().forEach((key, retry) -> {
-            Queue queue = QueueBuilder
-                    .durable(retry.getQueue())
+
+            // -------------------------------
+            // DELAY QUEUE (TTL ONLY)
+            // -------------------------------
+            Queue delayQueue = QueueBuilder
+                    .durable(retry.getQueue()) // e.g. retry.30s.queue
                     .withArgument("x-message-ttl", retry.getTtl())
+                    .withArgument("x-dead-letter-exchange", "")
+                    .withArgument(
+                            "x-dead-letter-routing-key",
+                            retryRouteQueueName(key)
+                    )
                     .build();
 
-            declarables.getDeclarables().add(queue);
+            // -------------------------------
+            // ROUTE QUEUE (NO TTL, HAS CONSUMER)
+            // -------------------------------
+            Queue routeQueue = QueueBuilder
+                    .durable(retryRouteQueueName(key))
+                    .build();
+
+            declarables.getDeclarables().add(delayQueue);
+            declarables.getDeclarables().add(routeQueue);
         });
 
         return declarables;
     }
+
+    /**
+     * retry.30s.queue  -> retry.30s.route.queue
+     */
+    private String retryRouteQueueName(String key) {
+        return "retry." + key + ".route.queue";
+    }
+
 
     // =================================================
     // DLQs

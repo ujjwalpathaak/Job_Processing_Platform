@@ -40,14 +40,14 @@ public class Producer {
             );
             jobStatusService.updateJobStatus(job, JobStatus.PUBLISHED, null);
             log.info(
-                    "Published job | jobId={} exchange={} routingKey={}",
+                    "{} - PUBLISHED - exchange: {}, routing_key: {}",
                     message.getJobId(),
                     exchange,
                     routingKey
             );
         } catch (Exception ex) {
             log.error(
-                    "Failed to publish job | jobId={} exchange={} routingKey={} error={}",
+                    "{} - failed to publish a job through exchange {} using routingKey {} because of the error = {}",
                     message.getJobId(),
                     exchange,
                     routingKey,

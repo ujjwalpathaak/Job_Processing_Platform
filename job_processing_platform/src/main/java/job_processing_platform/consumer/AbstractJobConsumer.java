@@ -47,7 +47,7 @@ public abstract class AbstractJobConsumer {
 
         jobService.updateJobStatus(job, JobStatus.PROCESSING);
 
-        log.info("{}Consumer starting to process | job_id: {}", category, job.getId());
+        log.info("{} - STARTING TO PROCESS - consumer: {}", job.getId(), category);
 
         try {
             handler.process(jobMessage);
@@ -55,14 +55,15 @@ public abstract class AbstractJobConsumer {
 
             channel.basicAck(tag, false);
 
-            log.info("{}Consumer finished processing | job_id: {}", category, job.getId());
+            log.info("{} - FINISHED PROCESSING - consumer: {}", job.getId(), category);
         } catch (Exception ex) {
             jobService.updateJobStatus(job, JobStatus.ERROR, ex.getMessage());
 
-            log.info("{}Consumer failed to process | job_id: {}", category, job.getId());
+            log.info("{} - FAILED TO PROCESS - consumer: {}", job.getId(), category);
 
             int retryCount = RetryHelper.getRetryCount(raw);
             boolean shouldRetry = RetryHelper.shouldRetry(handler, retryCount);
+
             if (!shouldRetry) {
                 rabbitTemplate.convertAndSend(
                         exchange,
@@ -72,7 +73,7 @@ public abstract class AbstractJobConsumer {
                 channel.basicAck(tag, false);
                 jobService.updateJobStatus(job, JobStatus.DEAD);
 
-                log.info("{}JobConsumer marked job: {} as DEAD and moved to {} | error: {}", category, job.getId(), queueConfig.getDlqRoutingKey(), ex.toString());
+                log.info("{} - MARKED AS DEAD - consumer: {}, dlq: {}, error: {}", job.getId(), category, queueConfig.getDlqRoutingKey(), ex.toString());
                 return;
             }
 
@@ -96,7 +97,7 @@ public abstract class AbstractJobConsumer {
 
             jobService.updateJobStatus(job, JobStatus.RETRY);
 
-            log.info("{}JobConsumer moved job: {} to retry queue: {} | error: {}", category, job.getId(), retryQueue, ex.toString());
+            log.info("{} - RETRY - consumer: {}, queue: {}, error: {}", job.getId(), category, retryQueue, ex.toString());
         }
     }
 }

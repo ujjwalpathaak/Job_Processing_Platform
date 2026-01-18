@@ -28,12 +28,12 @@ public class EmailJobHandler extends AbstractJobHandler {
 
     @Override
     public int retries() {
-        return 3;
+        return 2;
     }
 
     @Override
     public List<String> backoff() {
-        return List.of("30s", "5s", "5s");
+        return List.of("5s", "30s");
     }
 
     @Override
