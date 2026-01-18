@@ -111,16 +111,8 @@ public class RabbitConfig {
             Queue queue = QueueBuilder
                     .durable(retry.getQueue())
                     .withArgument("x-message-ttl", retry.getTtl())
-                    .withArgument(
-                            "x-dead-letter-exchange",
-                            props.getRabbit().getExchanges().get(JobCategory.STANDARD)
-                    )
-                    .withArgument(
-                            "x-dead-letter-routing-key",
-                            props.getRabbit().getStandard().getRoutingKey()
-                    )
                     .build();
-            
+
             declarables.getDeclarables().add(queue);
         });
 

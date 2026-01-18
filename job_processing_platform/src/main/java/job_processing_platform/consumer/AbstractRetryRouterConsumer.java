@@ -5,21 +5,35 @@ import job_processing_platform.dto.JobMessage;
 import job_processing_platform.enums.JobCategory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
-public class AbstractRetryRouterConsumer {
+public abstract class AbstractRetryRouterConsumer {
+
     protected final RabbitTemplate rabbitTemplate;
     protected final RabbitProperties rabbitProperties;
 
-    public AbstractRetryRouterConsumer(RabbitTemplate rabbitTemplate, RabbitProperties rabbitProperties) {
+    protected AbstractRetryRouterConsumer(
+            RabbitTemplate rabbitTemplate,
+            RabbitProperties rabbitProperties
+    ) {
         this.rabbitTemplate = rabbitTemplate;
         this.rabbitProperties = rabbitProperties;
     }
 
-    public void routeInternal(JobMessage job) {
+    protected void routeInternal(JobMessage job) {
         JobCategory category = job.getJobCategory();
 
+        String exchange =
+                rabbitProperties.getRabbit()
+                        .getExchanges()
+                        .get(category);
+
+        String routingKey =
+                rabbitProperties.getRabbit()
+                        .getQueue(category)
+                        .getRoutingKey();
+
         rabbitTemplate.convertAndSend(
-                rabbitProperties.getRabbit().getExchanges().get(category),
-                rabbitProperties.getRabbit().getRetries().get,
+                exchange,
+                routingKey,
                 job
         );
     }
