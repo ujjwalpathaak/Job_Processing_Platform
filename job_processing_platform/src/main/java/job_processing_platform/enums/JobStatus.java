@@ -2,8 +2,10 @@ package job_processing_platform.enums;
 
 public enum JobStatus {
     SCHEDULED,
-    CANCELLED,
+    PUBLISHED,
     PROCESSING,
     PROCESSED,
+    RETRY,
+    ERROR,
     DEAD
 }

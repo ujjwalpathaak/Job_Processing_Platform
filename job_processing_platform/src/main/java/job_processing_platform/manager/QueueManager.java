@@ -1,6 +1,6 @@
 package job_processing_platform.manager;
 
-import job_processing_platform.config.Rabbit.RabbitProperties;
+import job_processing_platform.config.RabbitProperties;
 import job_processing_platform.enums.JobCategory;
 import org.springframework.stereotype.Component;
 
@@ -19,8 +19,8 @@ public class QueueManager {
     public String getRoutingKey(JobCategory jobCategory) {
         return switch (jobCategory) {
             case STANDARD -> props.getRabbit().getStandard().getRoutingKey();
-            case EXTERNAL -> null;
-            case CRITICAL -> null;
+            case EXTERNAL -> props.getRabbit().getExternal().getRoutingKey();
+            case CRITICAL -> props.getRabbit().getCritical().getRoutingKey();
         };
     }
 }

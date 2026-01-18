@@ -10,7 +10,7 @@ public final class JobHandlerValidator {
     }
 
     public static void validate(JobHandler handler) {
-        if (handler.identify() == null || handler.identify().isBlank()) {
+        if (handler.identify() == null) {
             throw new IllegalStateException("Job identify() cannot be empty");
         }
 

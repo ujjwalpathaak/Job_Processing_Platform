@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Global Job Dashboard</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #f6f7fb;
+            --card: #ffffff;
+            --border: #e6e8ec;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --blue: #2563eb;
+            --green: #16a34a;
+            --red: #dc2626;
+            --yellow: #ca8a04;
+            --shadow: 0 10px 25px rgba(0,0,0,0.06);
+
+                --gray: #6b7280;
+    --amber: #f59e0b;
+    --indigo: #6366f1;
+    --blue: #2563eb;
+    --green: #16a34a;
+    --red: #dc2626;
+    --dark-red: #7f1d1d;
+
+        }
+
+        body {
+            margin: 0;
+            padding: 24px;
+            font-family: "Inter", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        h2 {
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 14px;
+            box-shadow: var(--shadow);
+            padding: 16px;
+        }
+
+        /* Filters */
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .filters select,
+        .filters input {
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-size: 13px;
+            background: white;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th {
+            padding: 12px;
+            text-align: left;
+            color: var(--muted);
+            background: #fafafa;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+        }
+
+        tr:hover {
+            background: #f9fafb;
+        }
+
+        .status {
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .json-toggle {
+            cursor: pointer;
+            color: var(--blue);
+            font-size: 12px;
+        }
+
+        pre {
+            margin: 8px 0 0;
+            padding: 10px;
+            background: #0f172a;
+            color: #e5e7eb;
+            border-radius: 8px;
+            font-size: 12px;
+            max-height: 200px;
+            overflow: auto;
+        }
+
+        .muted { color: var(--muted); }
+
+        .history-toggle {
+    cursor: pointer;
+    color: var(--blue);
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.history {
+    margin-top: 10px;
+    border-left: 2px solid var(--border);
+    padding-left: 12px;
+}
+
+.history-item {
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.history-item::before {
+    content: "";
+    position: absolute;
+    left: -19px;
+    top: 3px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--muted);
+}
+
+.history-stage.SCHEDULED { color: var(--gray); }
+.history-stage.RETRY { color: var(--amber); }
+.history-stage.PUBLISHED { color: var(--indigo); }
+.history-stage.PROCESSING { color: var(--blue); }
+.history-stage.ERROR { color: var(--red); }
+.history-stage.PROCESSED { color: var(--green); }
+.history-stage.DEAD { color: var(--dark-red); }
+
+
+.history-stage {
+    font-weight: 500;
+    font-size: 13px;
+}
+
+.history-time {
+    font-size: 11px;
+    color: var(--muted);
+}
+
+.history-error {
+    margin-top: 4px;
+    padding: 8px;
+    background: rgba(220,38,38,0.08);
+    color: var(--red);
+    border-radius: 6px;
+    font-size: 12px;
+}
+
+    </style>
+</head>
+<body>
+
+<h2>🌍 Global Job Dashboard</h2>
+
+<div class="card">
+    <div class="filters">
+        <select id="handlerFilter">
+            <option value="">All Handlers</option>
+        </select>
+        <select id="statusFilter">
+            <option value="">All Status</option>
+        </select>
+        <select id="categoryFilter">
+            <option value="">All Categories</option>
+        </select>
+        <select id="sortBy">
+            <option value="createdAt">Sort: Created</option>
+            <option class="${status}}" value="status">Sort: Status</option>
+            <option value="jobHandler">Sort: Handler</option>
+        </select>
+        <input id="search" placeholder="Search jobs..." type="text"/>
+    </div>
+
+    <table id="jobs">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Handler</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th>Data</th>
+            <th>Created</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<script>
+    let allJobs = [];
+    let lastPollTime = new Date().toISOString();
+
+    async function loadInitial() {
+        const res = await fetch('/jobs');
+        allJobs = await res.json();
+        populateFilters();
+        render();
+    }
+
+    async function pollUpdates() {
+        const res = await fetch(`/jobs/updates?since=${lastPollTime}`);
+        const jobs = await res.json();
+
+        if (jobs.length) {
+            lastPollTime = new Date().toISOString();
+            jobs.forEach(j => {
+                const idx = allJobs.findIndex(x => x.id === j.id);
+                if (idx >= 0) allJobs[idx] = j;
+                else allJobs.unshift(j);
+            });
+            populateFilters();
+            render();
+        }
+    }
+
+    function populateFilters() {
+        fillSelect('handlerFilter', allJobs.map(j => j.jobHandler));
+        fillSelect('statusFilter', allJobs.map(j => j.status));
+        fillSelect('categoryFilter', allJobs.map(j => j.jobCategory));
+    }
+
+    function fillSelect(id, values) {
+        const select = document.getElementById(id);
+        const current = select.value;
+        const unique = [...new Set(values.filter(Boolean))];
+
+        select.innerHTML = `<option value="">All</option>` +
+            unique.map(v => `<option value="${v}">${v}</option>`).join('');
+
+        select.value = current;
+    }
+
+    function render() {
+        const handler = handlerFilter.value;
+        const status = statusFilter.value;
+        const category = categoryFilter.value;
+        const search = document.getElementById('search').value.toLowerCase();
+        const sortBy = document.getElementById('sortBy').value;
+
+        let jobs = [...allJobs];
+
+        if (handler) jobs = jobs.filter(j => j.jobHandler === handler);
+        if (status) jobs = jobs.filter(j => j.status === status);
+        if (category) jobs = jobs.filter(j => j.jobCategory === category);
+
+        if (search) {
+            jobs = jobs.filter(j =>
+                JSON.stringify(j).toLowerCase().includes(search)
+            );
+        }
+
+        jobs.sort((a, b) => {
+            if (sortBy === 'createdAt')
+                return new Date(b.createdAt) - new Date(a.createdAt);
+            return (a[sortBy] || '').localeCompare(b[sortBy] || '');
+        });
+
+        const tbody = document.querySelector('#jobs tbody');
+        tbody.innerHTML = '';
+
+        jobs.forEach(job => {
+            const row = document.createElement('tr');
+
+            row.innerHTML = `
+                <td>${job.id}</td>
+                <td class="muted">${job.jobHandler}</td>
+                <td class="muted">${job.jobCategory}</td>
+                <td><span class="status ${job.status}">${job.status}</span></td>
+               <td>
+    <div class="history-toggle" onclick="toggleHistory(${job.id})">
+        ▾ View Details
+    </div>
+
+    <div id="history-${job.id}" style="display:none;">
+        <div class="history">
+            ${(job.history || []).map(h => `
+                <div class="history-item">
+                    <div class="history-stage ${h.status}">${h.status}</div>
+                    <div class="history-time">
+                        ${new Date(h.timestamp).toLocaleString()}
+                    </div>
+                    ${h.error ? `
+                        <div class="history-error">
+                            ${h.error}
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('')}
+        </div>
+
+        <pre style="margin-top:10px;">
+${JSON.stringify(job.data, null, 2)}
+        </pre>
+    </div>
+</td>
+
+                <td class="muted">${new Date(job.createdAt).toLocaleString()}</td>
+            `;
+
+            tbody.appendChild(row);
+        });
+    }
+function toggleHistory(id) {
+    const el = document.getElementById(`history-${id}`);
+    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+    function toggleJson(id) {
+        const el = document.getElementById(`json-${id}`);
+        el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    }
+
+    document.querySelectorAll('.filters select, .filters input')
+        .forEach(el => el.addEventListener('change', render));
+
+    loadInitial();
+<!--    setInterval(pollUpdates, 3000);-->
+</script>
+
+</body>
+</html>

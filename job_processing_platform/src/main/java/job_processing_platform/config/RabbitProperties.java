@@ -1,4 +1,4 @@
-package job_processing_platform.config.Rabbit;
+package job_processing_platform.config;
 
 import job_processing_platform.enums.JobCategory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -29,6 +29,14 @@ public class RabbitProperties {
 
         public void setExchanges(Map<JobCategory, String> exchanges) {
             this.exchanges = exchanges;
+        }
+
+        public Queue getQueue(JobCategory category) {
+            return switch (category) {
+                case EXTERNAL -> external;
+                case STANDARD -> standard;
+                case CRITICAL -> critical;
+            };
         }
 
         public Queue getStandard() {

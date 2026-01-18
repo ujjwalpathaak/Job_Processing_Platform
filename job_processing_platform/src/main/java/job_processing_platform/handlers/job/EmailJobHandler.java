@@ -2,12 +2,13 @@ package job_processing_platform.handlers.job;
 
 import job_processing_platform.dto.JobMessage;
 import job_processing_platform.enums.JobCategory;
+import job_processing_platform.enums.JobHandlerType;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
-public class EmailHandler extends AbstractJobHandler {
+public class EmailJobHandler extends AbstractJobHandler {
     //  validate
     //  beforeExecute
     //  beforeExecute
@@ -16,8 +17,8 @@ public class EmailHandler extends AbstractJobHandler {
     //  onFailure
 
     @Override
-    public String identify() {
-        return "EMAIL_HANDLER";
+    public JobHandlerType identify() {
+        return JobHandlerType.EMAIL;
     }
 
     @Override
@@ -32,7 +33,7 @@ public class EmailHandler extends AbstractJobHandler {
 
     @Override
     public List<String> backoff() {
-        return List.of("10s", "4s", "2s");
+        return List.of("30s", "5s", "5s");
     }
 
     @Override

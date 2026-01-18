@@ -2,11 +2,12 @@ package job_processing_platform.interfaces;
 
 import job_processing_platform.dto.JobMessage;
 import job_processing_platform.enums.JobCategory;
+import job_processing_platform.enums.JobHandlerType;
 
 import java.util.List;
 
 public interface JobHandler {
-    String identify();
+    JobHandlerType identify();
 
     JobCategory category();
 

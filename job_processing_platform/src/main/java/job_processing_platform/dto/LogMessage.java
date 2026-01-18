@@ -1,39 +1,37 @@
 package job_processing_platform.dto;
 
-import job_processing_platform.interfaces.Message;
+import job_processing_platform.enums.LogLevel;
 
-import java.io.Serializable;
 import java.time.Instant;
+import java.util.UUID;
 
-public class LogMessage implements Serializable, Message {
-    private Long jobId;
-    private String jobType;
-    private String message;
-    private String createdAt;
+public class LogMessage {
 
-    public Long getJobId() {
-        return jobId;
+    private final String id;
+    private final String message;
+    private final LogLevel level;
+    private final Instant timestamp;
+
+    public LogMessage(String message, LogLevel level) {
+        this.id = UUID.randomUUID().toString().substring(0, 8);
+        this.message = message;
+        this.level = level;
+        this.timestamp = Instant.now();
     }
 
-    public String getJobType() {
-        return jobType;
+    public String getId() {
+        return id;
     }
 
     public String getMessage() {
         return message;
     }
 
-    public String getCreatedAt() {
-        return createdAt;
+    public LogLevel getLevel() {
+        return level;
     }
 
-    public LogMessage() {
-    }
-
-    public LogMessage(Long jobId, String jobType, String message) {
-        this.jobId = jobId;
-        this.jobType = jobType;
-        this.message = message;
-        this.createdAt = Instant.now().toString();
+    public Instant getTimestamp() {
+        return timestamp;
     }
 }

@@ -1,9 +1,15 @@
 package job_processing_platform.interfaces;
 
+import job_processing_platform.dto.LogMessage;
+import job_processing_platform.enums.LogHandlerType;
 import job_processing_platform.enums.LogLevel;
 
-public interface LogHandler {
-    LogLevel identify();
+import java.util.List;
 
-    void handle(String message);
+public interface LogHandler {
+    LogHandlerType identify();
+
+    List<LogLevel> supportedLevels();
+
+    void handle(LogMessage message);
 }

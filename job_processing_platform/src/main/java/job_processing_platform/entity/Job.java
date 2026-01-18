@@ -2,6 +2,7 @@ package job_processing_platform.entity;
 
 import jakarta.persistence.*;
 import job_processing_platform.enums.JobCategory;
+import job_processing_platform.enums.JobHandlerType;
 import job_processing_platform.enums.JobStatus;
 import job_processing_platform.interfaces.JobHandler;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -17,9 +18,6 @@ public class Job {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String type;
-
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -28,6 +26,9 @@ public class Job {
 
     @Column(nullable = false)
     private JobCategory jobCategory;
+
+    @Column(nullable = false)
+    private JobHandlerType jobHandler;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
@@ -39,7 +40,7 @@ public class Job {
     public Job(JobHandler handler, Map<String, Object> data) {
         this.status = JobStatus.SCHEDULED;
         this.jobCategory = handler.category();
-        this.type = handler.identify();
+        this.jobHandler = handler.identify();
         this.data = data;
         this.createdAt = Instant.now();
     }
@@ -48,8 +49,8 @@ public class Job {
         return id;
     }
 
-    public String getType() {
-        return type;
+    public JobHandlerType getJobHandler() {
+        return jobHandler;
     }
 
     public JobCategory getJobCategory() {
