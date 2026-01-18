@@ -80,11 +80,10 @@ public abstract class AbstractJobConsumer {
             String delayKey = handler.backoff().get(retryCount);
             RabbitProperties.Retry retry = this.rabbitProperties.getRabbit().getRetries().get(delayKey);
             String retryQueue = retry.getQueue();
-            String retryRoutingKey = retry.getRoutingKey();
 
             rabbitTemplate.convertAndSend(
-                    "",                 // 🔥 DEFAULT EXCHANGE
-                    retryQueue,         // 🔥 QUEUE NAME (not routingKey)
+                    "",
+                    retryQueue,
                     jobMessage,
                     m -> {
                         m.getMessageProperties()

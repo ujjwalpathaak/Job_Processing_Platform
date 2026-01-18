@@ -8,7 +8,6 @@ import java.util.List;
 
 @Component
 public class LogInitializer {
-
     public LogInitializer(List<LogHandler> handlers) {
         log.init(handlers);
     }

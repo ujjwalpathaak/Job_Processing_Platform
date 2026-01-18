@@ -39,6 +39,5 @@ public class EmailJobHandler extends AbstractJobHandler {
     @Override
     protected void execute(JobMessage message) {
         throw new RuntimeException("TEST FAILURE");
-        // actual email logic
     }
 }

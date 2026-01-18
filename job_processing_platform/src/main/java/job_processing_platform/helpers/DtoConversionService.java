@@ -10,7 +10,6 @@ public class DtoConversionService {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public static Map<String, Object> convertDtoToMap(Object dto) {
-        // The convertValue method handles the conversion
         return objectMapper.convertValue(dto, Map.class);
     }
 }

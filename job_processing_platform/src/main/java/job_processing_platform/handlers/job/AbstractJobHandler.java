@@ -19,7 +19,6 @@ public abstract class AbstractJobHandler implements JobHandler {
         }
     }
 
-    // --- hooks ---
     protected void beforeExecute(JobMessage message) {
     }
 
@@ -32,6 +31,5 @@ public abstract class AbstractJobHandler implements JobHandler {
     protected void validate(JobMessage message) {
     }
 
-    // --- business logic ---
     protected abstract void execute(JobMessage message);
 }

@@ -19,9 +19,6 @@ public class RabbitConfig {
         this.props = props;
     }
 
-    // =================================================
-    // COMMON
-    // =================================================
     @Bean
     public MessageConverter messageConverter() {
         return new JacksonJsonMessageConverter();
@@ -41,9 +38,6 @@ public class RabbitConfig {
         return factory;
     }
 
-    // =================================================
-    // EXCHANGES
-    // =================================================
     @Bean
     public DirectExchange standardExchange() {
         return new DirectExchange(
@@ -65,9 +59,6 @@ public class RabbitConfig {
         );
     }
 
-    // =================================================
-    // MAIN QUEUES
-    // =================================================
     @Bean
     public Queue standardQueue() {
         return mainQueue(
@@ -100,36 +91,11 @@ public class RabbitConfig {
                 .build();
     }
 
-    // =================================================
-    // SHARED RETRY QUEUES
-    // =================================================
-//    @Bean
-//    public Declarables retryQueues() {
-//        Declarables declarables = new Declarables();
-//
-//        props.getRabbit().getRetries().forEach((key, retry) -> {
-//            Queue queue = QueueBuilder
-//                    .durable(retry.getQueue())
-//                    .withArgument("x-message-ttl", retry.getTtl())
-//                    .build();
-//
-//            declarables.getDeclarables().add(queue);
-//        });
-//
-//        return declarables;
-//    }
-    // =================================================
-// SHARED RETRY QUEUES (DELAY + ROUTE)
-// =================================================
     @Bean
     public Declarables retryQueues() {
         Declarables declarables = new Declarables();
 
         props.getRabbit().getRetries().forEach((key, retry) -> {
-
-            // -------------------------------
-            // DELAY QUEUE (TTL ONLY)
-            // -------------------------------
             Queue delayQueue = QueueBuilder
                     .durable(retry.getQueue()) // e.g. retry.30s.queue
                     .withArgument("x-message-ttl", retry.getTtl())
@@ -140,9 +106,6 @@ public class RabbitConfig {
                     )
                     .build();
 
-            // -------------------------------
-            // ROUTE QUEUE (NO TTL, HAS CONSUMER)
-            // -------------------------------
             Queue routeQueue = QueueBuilder
                     .durable(retryRouteQueueName(key))
                     .build();
@@ -154,17 +117,10 @@ public class RabbitConfig {
         return declarables;
     }
 
-    /**
-     * retry.30s.queue  -> retry.30s.route.queue
-     */
     private String retryRouteQueueName(String key) {
         return "retry." + key + ".route.queue";
     }
 
-
-    // =================================================
-    // DLQs
-    // =================================================
     @Bean
     public Queue standardDlq() {
         return QueueBuilder
@@ -186,35 +142,24 @@ public class RabbitConfig {
                 .build();
     }
 
-    // =================================================
-    // BINDINGS
-    // =================================================
     @Bean
     public Declarables bindings() {
         return new Declarables(
-                // STANDARD
                 BindingBuilder.bind(standardQueue())
                         .to(standardExchange())
                         .with(props.getRabbit().getStandard().getRoutingKey()),
-
                 BindingBuilder.bind(standardDlq())
                         .to(standardExchange())
                         .with(props.getRabbit().getStandard().getDlqRoutingKey()),
-
-                // CRITICAL
                 BindingBuilder.bind(criticalQueue())
                         .to(criticalExchange())
                         .with(props.getRabbit().getCritical().getRoutingKey()),
-
                 BindingBuilder.bind(criticalDlq())
                         .to(criticalExchange())
                         .with(props.getRabbit().getCritical().getDlqRoutingKey()),
-
-                // EXTERNAL
                 BindingBuilder.bind(externalQueue())
                         .to(externalExchange())
                         .with(props.getRabbit().getExternal().getRoutingKey()),
-
                 BindingBuilder.bind(externalDlq())
                         .to(externalExchange())
                         .with(props.getRabbit().getExternal().getDlqRoutingKey())
