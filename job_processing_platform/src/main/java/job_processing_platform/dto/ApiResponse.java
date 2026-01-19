@@ -37,19 +37,11 @@ public class ApiResponse<T> {
         return new ApiResponse<>(false, message, null, errors);
     }
 
-    public boolean isSuccess() {
-        return success;
-    }
-
     public String getMessage() {
         return message;
     }
 
     public T getData() {
         return data;
-    }
-
-    public Object getErrors() {
-        return errors;
     }
 }

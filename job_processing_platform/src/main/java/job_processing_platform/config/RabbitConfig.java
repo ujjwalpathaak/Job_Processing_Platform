@@ -95,30 +95,28 @@ public class RabbitConfig {
     public Declarables retryQueues() {
         Declarables declarables = new Declarables();
 
+        Queue retryRouteQueue = QueueBuilder
+                .durable("retry.route.queue")
+                .build();
+
+        declarables.getDeclarables().add(retryRouteQueue);
+
         props.getRabbit().getRetries().forEach((key, retry) -> {
+
             Queue delayQueue = QueueBuilder
-                    .durable(retry.getQueue()) // e.g. retry.30s.queue
+                    .durable(retry.getQueue())
                     .withArgument("x-message-ttl", retry.getTtl())
                     .withArgument("x-dead-letter-exchange", "")
                     .withArgument(
                             "x-dead-letter-routing-key",
-                            retryRouteQueueName(key)
+                            retryRouteQueue.getName()
                     )
                     .build();
 
-            Queue routeQueue = QueueBuilder
-                    .durable(retryRouteQueueName(key))
-                    .build();
-
             declarables.getDeclarables().add(delayQueue);
-            declarables.getDeclarables().add(routeQueue);
         });
 
         return declarables;
-    }
-
-    private String retryRouteQueueName(String key) {
-        return "retry." + key + ".route.queue";
     }
 
     @Bean

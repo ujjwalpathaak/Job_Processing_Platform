@@ -24,7 +24,7 @@ public class Producer {
         this.jobStatusService = jobStatusService;
     }
 
-    public void publish(Job job, JobMessage message) throws Exception {
+    public void publish(Job job, JobMessage message) throws RuntimeException, InvalidAttributesException {
 
         String exchange = queueManager.getExchange();
         String routingKey = queueManager.getRoutingKey(message.getJobCategory());
@@ -45,7 +45,7 @@ public class Producer {
                     exchange,
                     routingKey
             );
-        } catch (Exception ex) {
+        } catch (RuntimeException ex) {
             log.error(
                     "{} - failed to publish a job through exchange {} using routingKey {} because of the error = {}",
                     message.getJobId(),

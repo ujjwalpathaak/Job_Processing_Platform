@@ -221,15 +221,15 @@
 
     async function loadInitial() {
         const res = await fetch('/jobs');
-        allJobs = await res.json();
+        allJobs = (await res.json()).data;
         populateFilters();
         render();
     }
 
     async function pollUpdates() {
         const res = await fetch(`/jobs/updates?since=${lastPollTime}`);
-        const jobs = await res.json();
-
+        const jobs = (await res.json()).data;
+        console.log(jobs);
         if (jobs.length) {
             lastPollTime = new Date().toISOString();
             jobs.forEach(j => {

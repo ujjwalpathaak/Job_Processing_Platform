@@ -9,7 +9,6 @@ import job_processing_platform.entity.JobStateHistory;
 import job_processing_platform.enums.JobHandlerType;
 import job_processing_platform.enums.JobStatus;
 import job_processing_platform.factory.JobHandlerFactory;
-import job_processing_platform.helpers.DtoConversionService;
 import job_processing_platform.interfaces.JobHandler;
 import job_processing_platform.producer.Producer;
 import job_processing_platform.repository.JobRepository;
@@ -39,31 +38,65 @@ public class JobService {
         this.producer = producer;
     }
 
-    public void execute(JobHandlerType handlerType, Object payload) {
+    @SuppressWarnings("unchecked")
+    public long execute(Map<String, Object> payload) throws Exception {
+        Object typeObj = payload.get("type");
+        if (typeObj == null) {
+            throw new IllegalArgumentException("Missing job type");
+        }
+        JobHandlerType handlerType;
+        try {
+            handlerType = JobHandlerType.valueOf(typeObj.toString());
+        } catch (IllegalArgumentException ex) {
+            throw new IllegalArgumentException("Invalid job type: " + typeObj);
+        }
+        Object dataObj = payload.get("data");
+        if (!(dataObj instanceof Map)) {
+            throw new IllegalArgumentException("Missing or invalid 'data' object");
+        }
+
+        Map<String, Object> data = (Map<String, Object>) dataObj;
+        Job job = null;
         try {
             JobHandler handler = jobHandlerFactory.get(handlerType);
-            Map<String, Object> data = DtoConversionService.convertDtoToMap(
-                    payload
+            Job newJob = new Job(handler, data);
+            job = jobRepository.save(
+                    newJob
             );
-            Job job = jobRepository.save(new Job(handler, data));
-            this.updateJobStatus(job, JobStatus.SCHEDULED);
             if (job.getId() == null) {
                 throw new IllegalStateException("Error creating a new job");
             }
-            JobMessage jobMessage = new JobMessage(job.getId(), job.getJobCategory(), handlerType, data);
+            updateJobStatus(job, JobStatus.SCHEDULED);
+            JobMessage jobMessage = new JobMessage(
+                    job.getId(),
+                    job.getJobCategory(),
+                    handlerType,
+                    data
+            );
 
-            log.info("{} - CREATED NEW JOB - handler: {}, category: {}, backoffs: {}, retries: {}", job.getId(), handler.identify(), handler.category(), handler.backoff(), handler.retries());
+            log.info(
+                    "{} - CREATED NEW JOB - handler: {}, category: {}, backoffs: {}, retries: {}",
+                    job.getId(),
+                    handler.identify(),
+                    handler.category(),
+                    handler.backoff(),
+                    handler.retries()
+            );
 
             producer.publish(job, jobMessage);
         } catch (Exception ex) {
             log.error(
-                    "Job creation failed for handler {} with payload {} because of the error = {}",
+                    "Job creation failed for handler {} with payload {} because of error = {}",
                     handlerType,
                     payload,
-                    ex.toString()
+                    ex.getMessage(),
+                    ex
             );
-//            throw ex;
+
+            throw ex;
         }
+
+        return job.getId();
     }
 
     public void updateJobStatus(Job job, JobStatus status) {
