@@ -12,8 +12,12 @@ public class QueueManager {
         this.props = rabbitProperties;
     }
 
-    public String getExchange() {
-        return props.getRabbit().getExchanges().get(JobCategory.STANDARD);
+    public String getExchange(JobCategory jobCategory) {
+        return switch (jobCategory) {
+            case STANDARD -> props.getRabbit().getExchanges().get(JobCategory.STANDARD);
+            case EXTERNAL -> props.getRabbit().getExchanges().get(JobCategory.EXTERNAL);
+            case CRITICAL -> props.getRabbit().getExchanges().get(JobCategory.CRITICAL);
+        };
     }
 
     public String getRoutingKey(JobCategory jobCategory) {

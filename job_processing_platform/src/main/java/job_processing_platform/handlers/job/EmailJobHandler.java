@@ -38,6 +38,9 @@ public class EmailJobHandler extends AbstractJobHandler {
 
     @Override
     protected void execute(JobMessage message) {
-        throw new RuntimeException("TEST FAILURE");
+        if (Math.random() < 0.3) {
+            throw new RuntimeException("Invalid emailId");
+        }
+        System.out.println("Email sent for job " + message.getJobId());
     }
 }

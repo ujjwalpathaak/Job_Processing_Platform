@@ -26,7 +26,7 @@ public class Producer {
 
     public void publish(Job job, JobMessage message) throws RuntimeException, InvalidAttributesException {
 
-        String exchange = queueManager.getExchange();
+        String exchange = queueManager.getExchange(message.getJobCategory());
         String routingKey = queueManager.getRoutingKey(message.getJobCategory());
         if (exchange == null || routingKey == null) {
             throw new InvalidAttributesException("exchange and routing-key cannot be null");

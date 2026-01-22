@@ -34,6 +34,8 @@ public class RabbitConfig {
         factory.setConnectionFactory(connectionFactory);
         factory.setMessageConverter(messageConverter);
         factory.setAcknowledgeMode(AcknowledgeMode.MANUAL);
+        factory.setConcurrentConsumers(5);
+        factory.setMaxConcurrentConsumers(10);
         factory.setPrefetchCount(1);
         return factory;
     }
