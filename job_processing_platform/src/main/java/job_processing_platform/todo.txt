@@ -1,4 +1,6 @@
  - Test using JMeter
+ - indexing?
  - Fig out breaking points - how to identify?
- - Multi-threading required ?
  - add checks for statuses
+ - check status map
+ - complete diagram

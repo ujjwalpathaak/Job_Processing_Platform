@@ -4,7 +4,6 @@ import job_processing_platform.enums.JobCategory;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
-import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
@@ -24,8 +23,7 @@ public class RabbitConfig {
         return new JacksonJsonMessageConverter();
     }
 
-    @Bean
-    public RabbitListenerContainerFactory<?> rabbitListenerContainerFactory(
+    private SimpleRabbitListenerContainerFactory createBaseFactory(
             ConnectionFactory connectionFactory,
             MessageConverter messageConverter
     ) {
@@ -34,10 +32,52 @@ public class RabbitConfig {
         factory.setConnectionFactory(connectionFactory);
         factory.setMessageConverter(messageConverter);
         factory.setAcknowledgeMode(AcknowledgeMode.MANUAL);
-        factory.setConcurrentConsumers(5);
-        factory.setMaxConcurrentConsumers(10);
-        factory.setPrefetchCount(1);
         return factory;
+    }
+
+    @Bean
+    public SimpleRabbitListenerContainerFactory criticalFactory(
+            ConnectionFactory connectionFactory,
+            MessageConverter messageConverter
+    ) {
+        SimpleRabbitListenerContainerFactory f =
+                createBaseFactory(connectionFactory, messageConverter);
+
+        f.setConcurrentConsumers(1);
+        f.setMaxConcurrentConsumers(3);
+        f.setPrefetchCount(1);
+
+        return f;
+    }
+
+    @Bean
+    public SimpleRabbitListenerContainerFactory standardFactory(
+            ConnectionFactory connectionFactory,
+            MessageConverter messageConverter
+    ) {
+        SimpleRabbitListenerContainerFactory f =
+                createBaseFactory(connectionFactory, messageConverter);
+
+        f.setConcurrentConsumers(10);
+        f.setMaxConcurrentConsumers(20);
+        f.setPrefetchCount(5);
+
+        return f;
+    }
+
+    @Bean
+    public SimpleRabbitListenerContainerFactory externalFactory(
+            ConnectionFactory connectionFactory,
+            MessageConverter messageConverter
+    ) {
+        SimpleRabbitListenerContainerFactory f =
+                createBaseFactory(connectionFactory, messageConverter);
+
+        f.setConcurrentConsumers(2);
+        f.setMaxConcurrentConsumers(5);
+        f.setPrefetchCount(1);
+
+        return f;
     }
 
     @Bean

@@ -23,7 +23,7 @@ public class StandardJobConsumer extends AbstractJobConsumer {
 
     @RabbitListener(
             queues = "${job.platform.rabbit.standard.queue}",
-            containerFactory = "rabbitListenerContainerFactory"
+            containerFactory = "standardFactory"
     )
     public void consume(JobMessage job, Message raw, Channel channel)
             throws Exception {

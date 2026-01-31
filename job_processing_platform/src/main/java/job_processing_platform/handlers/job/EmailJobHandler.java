@@ -9,13 +9,6 @@ import java.util.List;
 
 @Component
 public class EmailJobHandler extends AbstractJobHandler {
-    //  validate
-    //  beforeExecute
-    //  beforeExecute
-    //  execute
-    //  afterExecute
-    //  onFailure
-
     @Override
     public JobHandlerType identify() {
         return JobHandlerType.EMAIL;

@@ -20,4 +20,20 @@ public interface JobRepository extends JpaRepository<Job, Long> {
                         @Param("status") JobStatus status);
 
     List<Job> findAllByOrderByCreatedAtDesc();
+
+    @Modifying
+    @Query("""
+            UPDATE Job j
+            SET j.status = :newStatus,
+                j.errorMessage = :error
+            WHERE j.id = :jobId
+              AND j.status = :expectedStatus
+            """)
+    int updateStatusIfCurrentMatches(
+            Long jobId,
+            JobStatus expectedStatus,
+            JobStatus newStatus,
+            String error
+    );
+
 }

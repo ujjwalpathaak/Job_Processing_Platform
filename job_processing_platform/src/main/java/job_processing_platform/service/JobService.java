@@ -19,11 +19,23 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 @Primary
 public class JobService {
+    private static final Map<JobStatus, Set<JobStatus>> ALLOWED_TRANSITIONS =
+            Map.of(
+                    JobStatus.SCHEDULED, Set.of(JobStatus.PUBLISHED, JobStatus.DEAD),
+                    JobStatus.PUBLISHED, Set.of(JobStatus.PROCESSING, JobStatus.DEAD),
+                    JobStatus.PROCESSING, Set.of(JobStatus.PROCESSED, JobStatus.RETRY, JobStatus.ERROR, JobStatus.DEAD),
+                    JobStatus.RETRY, Set.of(JobStatus.PROCESSING, JobStatus.DEAD),
+                    JobStatus.ERROR, Set.of(JobStatus.RETRY, JobStatus.DEAD),
+                    JobStatus.PROCESSED, Set.of(),
+                    JobStatus.DEAD, Set.of()
+            );
+
     private final JobRepository jobRepository;
     private final JobHandlerFactory jobHandlerFactory;
     private final Producer producer;
@@ -103,8 +115,28 @@ public class JobService {
         jobStatusService.updateJobStatus(job, status, null);
     }
 
-    public void updateJobStatus(Job job, JobStatus status, String error) {
-        jobStatusService.updateJobStatus(job, status, error);
+    public void updateJobStatus(Job job, JobStatus newStatus, String error) {
+
+        JobStatus expected = job.getStatus();
+
+        if (!ALLOWED_TRANSITIONS.get(expected).contains(newStatus)) {
+            throw new IllegalStateException("Invalid transition");
+        }
+
+        int updated = jobRepository.updateStatusIfCurrentMatches(
+                job.getId(),
+                expected,
+                newStatus,
+                error
+        );
+
+        if (updated == 0) {
+            log.info(
+                    "Skipping status update because job {} moved from {} already",
+                    job.getId(), expected
+            );
+            return;
+        }
     }
 
     @Transactional()
