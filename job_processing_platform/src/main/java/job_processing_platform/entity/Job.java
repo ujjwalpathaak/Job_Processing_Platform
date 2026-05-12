@@ -6,6 +6,7 @@ import job_processing_platform.enums.JobHandlerType;
 import job_processing_platform.enums.JobStatus;
 import job_processing_platform.interfaces.JobHandler;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
@@ -21,6 +22,10 @@ public class Job {
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private Instant updatedAt;
+
     @Column(nullable = false)
     private JobStatus status;
 
@@ -29,6 +34,9 @@ public class Job {
 
     @Column(nullable = false)
     private JobHandlerType jobHandler;
+
+    @Column(name = "error_message", columnDefinition = "text")
+    private String errorMessage;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
@@ -61,8 +69,16 @@ public class Job {
         return createdAt;
     }
 
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
+
     public JobStatus getStatus() {
         return status;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
     }
 
     public Map<String, Object> getData() {

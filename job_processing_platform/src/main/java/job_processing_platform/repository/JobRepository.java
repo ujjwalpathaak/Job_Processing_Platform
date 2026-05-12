@@ -9,11 +9,12 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface JobRepository extends JpaRepository<Job, Long> {
+public interface JobRepository extends JpaRepository<Job, Long>, JobRepositoryCustom {
     @Modifying
     @Query("""
                 UPDATE Job j
-                SET j.status = :status
+                SET j.status = :status,
+                    j.updatedAt = CURRENT_TIMESTAMP
                 WHERE j.id = :jobId
             """)
     int updateJobStatus(@Param("jobId") long jobId,
@@ -25,15 +26,16 @@ public interface JobRepository extends JpaRepository<Job, Long> {
     @Query("""
             UPDATE Job j
             SET j.status = :newStatus,
-                j.errorMessage = :error
+                j.errorMessage = :error,
+                j.updatedAt = CURRENT_TIMESTAMP
             WHERE j.id = :jobId
               AND j.status = :expectedStatus
             """)
     int updateStatusIfCurrentMatches(
-            Long jobId,
-            JobStatus expectedStatus,
-            JobStatus newStatus,
-            String error
+            @Param("jobId") Long jobId,
+            @Param("expectedStatus") JobStatus expectedStatus,
+            @Param("newStatus") JobStatus newStatus,
+            @Param("error") String error
     );
 
 }
