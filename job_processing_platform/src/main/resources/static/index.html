@@ -14,20 +14,23 @@
             --text: #1f2937;
             --muted: #6b7280;
             --blue: #2563eb;
+            --blue-light: #eff6ff;
             --green: #16a34a;
+            --green-light: #f0fdf4;
             --red: #dc2626;
+            --red-light: #fef2f2;
             --yellow: #ca8a04;
+            --yellow-light: #fefce8;
             --shadow: 0 10px 25px rgba(0,0,0,0.06);
-
-                --gray: #6b7280;
-    --amber: #f59e0b;
-    --indigo: #6366f1;
-    --blue: #2563eb;
-    --green: #16a34a;
-    --red: #dc2626;
-    --dark-red: #7f1d1d;
-
+            --gray: #6b7280;
+            --amber: #f59e0b;
+            --indigo: #6366f1;
+            --dark-red: #7f1d1d;
+            --purple: #7c3aed;
+            --purple-light: #f5f3ff;
         }
+
+        * { box-sizing: border-box; }
 
         body {
             margin: 0;
@@ -37,23 +40,21 @@
             color: var(--text);
         }
 
-        h2 {
-            margin-bottom: 16px;
-            font-weight: 600;
-        }
+        h2 { margin: 0 0 20px; font-weight: 600; font-size: 18px; }
 
         .card {
             background: var(--card);
             border-radius: 14px;
             box-shadow: var(--shadow);
-            padding: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
         }
 
-        /* Filters */
+        /* ── Filters ── */
         .filters {
             display: flex;
             flex-wrap: wrap;
-            gap: 12px;
+            gap: 10px;
             margin-bottom: 16px;
         }
 
@@ -64,8 +65,10 @@
             border: 1px solid var(--border);
             font-size: 13px;
             background: white;
+            font-family: inherit;
         }
 
+        /* ── Table ── */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -73,7 +76,7 @@
         }
 
         th {
-            padding: 12px;
+            padding: 10px 12px;
             text-align: left;
             color: var(--muted);
             background: #fafafa;
@@ -82,26 +85,75 @@
         }
 
         td {
-            padding: 12px;
+            padding: 10px 12px;
             border-bottom: 1px solid var(--border);
             vertical-align: top;
         }
 
-        tr:hover {
-            background: #f9fafb;
-        }
+        tr:hover { background: #f9fafb; }
 
         .status {
-            padding: 4px 10px;
+            padding: 3px 10px;
             border-radius: 999px;
-            font-size: 12px;
-            font-weight: 500;
+            font-size: 11px;
+            font-weight: 600;
             display: inline-block;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
         }
+        .status.SCHEDULED  { background:#f1f5f9; color:var(--gray); }
+        .status.PUBLISHED  { background:#eef2ff; color:var(--indigo); }
+        .status.PROCESSING { background:var(--blue-light); color:var(--blue); }
+        .status.PROCESSED  { background:var(--green-light); color:var(--green); }
+        .status.RETRY      { background:var(--yellow-light); color:var(--yellow); }
+        .status.ERROR      { background:var(--red-light); color:var(--red); }
+        .status.DEAD       { background:#fef2f2; color:var(--dark-red); font-weight:700; }
 
-        .json-toggle {
+        .muted { color: var(--muted); }
+
+        .history-toggle {
             cursor: pointer;
             color: var(--blue);
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .history {
+            margin-top: 10px;
+            border-left: 2px solid var(--border);
+            padding-left: 12px;
+        }
+
+        .history-item { margin-bottom: 10px; position: relative; }
+
+        .history-item::before {
+            content: "";
+            position: absolute;
+            left: -19px;
+            top: 3px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--muted);
+        }
+
+        .history-stage { font-weight: 500; font-size: 13px; }
+        .history-stage.SCHEDULED  { color: var(--gray); }
+        .history-stage.RETRY      { color: var(--amber); }
+        .history-stage.PUBLISHED  { color: var(--indigo); }
+        .history-stage.PROCESSING { color: var(--blue); }
+        .history-stage.ERROR      { color: var(--red); }
+        .history-stage.PROCESSED  { color: var(--green); }
+        .history-stage.DEAD       { color: var(--dark-red); }
+
+        .history-time { font-size: 11px; color: var(--muted); }
+
+        .history-error {
+            margin-top: 4px;
+            padding: 6px 8px;
+            background: rgba(220,38,38,0.08);
+            color: var(--red);
+            border-radius: 6px;
             font-size: 12px;
         }
 
@@ -116,69 +168,369 @@
             overflow: auto;
         }
 
-        .muted { color: var(--muted); }
+        /* ── AI Insights Panel ── */
+        .ai-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+        }
 
-        .history-toggle {
-    cursor: pointer;
-    color: var(--blue);
-    font-size: 12px;
-    font-weight: 500;
-}
+        .ai-header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-.history {
-    margin-top: 10px;
-    border-left: 2px solid var(--border);
-    padding-left: 12px;
-}
+        .ai-title { font-size: 15px; font-weight: 600; }
 
-.history-item {
-    margin-bottom: 10px;
-    position: relative;
-}
+        .ai-badge {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: var(--purple-light);
+            color: var(--purple);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
 
-.history-item::before {
-    content: "";
-    position: absolute;
-    left: -19px;
-    top: 3px;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--muted);
-}
+        .ai-chevron {
+            font-size: 14px;
+            color: var(--muted);
+            transition: transform 0.2s;
+        }
+        .ai-chevron.open { transform: rotate(180deg); }
 
-.history-stage.SCHEDULED { color: var(--gray); }
-.history-stage.RETRY { color: var(--amber); }
-.history-stage.PUBLISHED { color: var(--indigo); }
-.history-stage.PROCESSING { color: var(--blue); }
-.history-stage.ERROR { color: var(--red); }
-.history-stage.PROCESSED { color: var(--green); }
-.history-stage.DEAD { color: var(--dark-red); }
+        .ai-body { margin-top: 16px; }
 
+        .ai-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: flex-end;
+            margin-bottom: 16px;
+        }
 
-.history-stage {
-    font-weight: 500;
-    font-size: 13px;
-}
+        .ai-form-group { display: flex; flex-direction: column; gap: 4px; }
 
-.history-time {
-    font-size: 11px;
-    color: var(--muted);
-}
+        .ai-form-group label {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
 
-.history-error {
-    margin-top: 4px;
-    padding: 8px;
-    background: rgba(220,38,38,0.08);
-    color: var(--red);
-    border-radius: 6px;
-    font-size: 12px;
-}
+        .ai-form-group input[type="number"],
+        .ai-form-group input[type="text"] {
+            padding: 7px 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-size: 13px;
+            font-family: inherit;
+            width: 120px;
+            background: white;
+        }
 
+        .ai-form-group input.wide { width: 260px; }
+
+        .ai-form-group.checkbox-group {
+            flex-direction: row;
+            align-items: center;
+            gap: 6px;
+            padding-bottom: 2px;
+        }
+
+        .ai-form-group.checkbox-group label {
+            text-transform: none;
+            letter-spacing: 0;
+            font-size: 13px;
+            font-weight: 400;
+            color: var(--text);
+            cursor: pointer;
+        }
+
+        .btn {
+            padding: 8px 18px;
+            border-radius: 8px;
+            border: none;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: opacity 0.15s;
+        }
+        .btn:hover { opacity: 0.85; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .btn-primary { background: var(--purple); color: white; }
+        .btn-ghost {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .ai-loading {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--muted);
+            font-size: 13px;
+            padding: 12px 0;
+        }
+
+        .spinner {
+            width: 18px; height: 18px;
+            border: 2px solid var(--border);
+            border-top-color: var(--purple);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            flex-shrink: 0;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .ai-error {
+            padding: 12px 14px;
+            background: var(--red-light);
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            color: var(--red);
+            font-size: 13px;
+        }
+
+        /* Results */
+        .ai-results { display: flex; flex-direction: column; gap: 14px; }
+
+        .ai-summary {
+            padding: 14px 16px;
+            background: var(--purple-light);
+            border-left: 3px solid var(--purple);
+            border-radius: 0 8px 8px 0;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #3b0764;
+        }
+
+        .ai-answer {
+            padding: 12px 14px;
+            background: var(--blue-light);
+            border-left: 3px solid var(--blue);
+            border-radius: 0 8px 8px 0;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #1e3a8a;
+        }
+
+        .ai-answer-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--blue);
+            margin-bottom: 4px;
+        }
+
+        .ai-cols { display: flex; gap: 14px; flex-wrap: wrap; }
+        .ai-col { flex: 1; min-width: 200px; }
+
+        .ai-section-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .ai-list {
+            list-style: none;
+            padding: 0; margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .ai-list li {
+            font-size: 13px;
+            line-height: 1.5;
+            padding: 8px 10px;
+            border-radius: 7px;
+            position: relative;
+            padding-left: 22px;
+        }
+
+        .ai-list li::before {
+            content: "•";
+            position: absolute;
+            left: 8px;
+            font-weight: 700;
+        }
+
+        .ai-list.findings li {
+            background: #fafafa;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+        .ai-list.findings li::before { color: var(--indigo); }
+
+        .ai-list.recommendations li {
+            background: var(--green-light);
+            border: 1px solid #bbf7d0;
+            color: #14532d;
+        }
+        .ai-list.recommendations li::before { color: var(--green); }
+
+        /* Metrics grid */
+        .metrics-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .metric-chip {
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 500;
+            background: #f1f5f9;
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .metric-chip.red    { background: var(--red-light); color: var(--red); border-color: #fecaca; }
+        .metric-chip.green  { background: var(--green-light); color: var(--green); border-color: #bbf7d0; }
+        .metric-chip.amber  { background: var(--yellow-light); color: var(--yellow); border-color: #fde68a; }
+        .metric-chip.blue   { background: var(--blue-light); color: var(--blue); border-color: #bfdbfe; }
+        .metric-chip.purple { background: var(--purple-light); color: var(--purple); border-color: #ddd6fe; }
+
+        .metrics-stat {
+            text-align: center;
+            padding: 10px 14px;
+            background: #fafafa;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            min-width: 90px;
+        }
+        .metrics-stat .stat-num {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--purple);
+        }
+        .metrics-stat .stat-label {
+            font-size: 10px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-top: 2px;
+        }
+
+        .ai-source {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            font-size: 11px;
+            color: var(--muted);
+            padding-top: 6px;
+            border-top: 1px solid var(--border);
+        }
+
+        .ai-source .model-badge {
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 11px;
+        }
+        .ai-source .model-badge.llm   { background: var(--purple-light); color: var(--purple); }
+        .ai-source .model-badge.rules { background: #f1f5f9; color: var(--gray); }
+
+        .raw-context-toggle {
+            cursor: pointer;
+            font-size: 12px;
+            color: var(--blue);
+            font-weight: 500;
+            display: inline-block;
+            margin-top: 4px;
+        }
+
+        .raw-context-body {
+            margin-top: 8px;
+            font-size: 12px;
+        }
+
+        .chunk-item {
+            padding: 6px 10px;
+            background: #0f172a;
+            color: #93c5fd;
+            border-radius: 6px;
+            margin-bottom: 4px;
+            font-family: monospace;
+            font-size: 11px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
     </style>
 </head>
 <body>
 
+<!-- ── AI Insights Panel ─────────────────────────────────────────────── -->
+<div class="card" id="aiCard">
+    <div class="ai-header" onclick="toggleAiPanel()">
+        <div class="ai-header-left">
+            <span style="font-size:18px">🤖</span>
+            <span class="ai-title">AI Operational Insights</span>
+            <span class="ai-badge">RAG</span>
+        </div>
+        <span class="ai-chevron" id="aiChevron">▼</span>
+    </div>
+
+    <div class="ai-body" id="aiBody" style="display:none;">
+        <div class="ai-form">
+            <div class="ai-form-group">
+                <label>Hours</label>
+                <input type="number" id="aiHours" value="24" min="1" max="720"/>
+            </div>
+            <div class="ai-form-group">
+                <label>Log Lines</label>
+                <input type="number" id="aiLogLines" value="120" min="10" max="1000"/>
+            </div>
+            <div class="ai-form-group">
+                <label>Job Limit</label>
+                <input type="number" id="aiJobLimit" value="100" min="1" max="500"/>
+            </div>
+            <div class="ai-form-group" style="flex:1; min-width:200px;">
+                <label>Ask a question (optional)</label>
+                <input type="text" class="wide" id="aiQuestion"
+                       placeholder="e.g. Why are CRM sync jobs failing?"
+                       style="width:100%;"/>
+            </div>
+            <div class="ai-form-group checkbox-group">
+                <input type="checkbox" id="aiRawContext"/>
+                <label for="aiRawContext">Include raw context</label>
+            </div>
+            <button class="btn btn-primary" id="aiBtn" onclick="runInsights()">
+                ✦ Generate Insights
+            </button>
+        </div>
+
+        <div id="aiLoading" style="display:none;">
+            <div class="ai-loading">
+                <div class="spinner"></div>
+                Analyzing jobs, logs, and docs…
+            </div>
+        </div>
+
+        <div id="aiError" style="display:none;" class="ai-error"></div>
+
+        <div id="aiResults" style="display:none;" class="ai-results"></div>
+    </div>
+</div>
+
+<!-- ── Job Dashboard ─────────────────────────────────────────────────── -->
 <h2>🌍 Global Job Dashboard</h2>
 
 <div class="card">
@@ -194,10 +546,10 @@
         </select>
         <select id="sortBy">
             <option value="createdAt">Sort: Created</option>
-            <option class="${status}}" value="status">Sort: Status</option>
+            <option value="status">Sort: Status</option>
             <option value="jobHandler">Sort: Handler</option>
         </select>
-        <input id="search" placeholder="Search jobs..." type="text"/>
+        <input id="search" placeholder="Search jobs…" type="text"/>
     </div>
 
     <table id="jobs">
@@ -207,7 +559,7 @@
             <th>Handler</th>
             <th>Category</th>
             <th>Status</th>
-            <th>Data</th>
+            <th>Details</th>
             <th>Created</th>
         </tr>
         </thead>
@@ -216,20 +568,20 @@
 </div>
 
 <script>
+    /* ─── Job dashboard ──────────────────────────────────────────── */
     let allJobs = [];
     let lastPollTime = new Date().toISOString();
 
     async function loadInitial() {
         const res = await fetch('/jobs');
-        allJobs = (await res.json()).data;
+        allJobs = (await res.json()).data || [];
         populateFilters();
         render();
     }
 
     async function pollUpdates() {
         const res = await fetch(`/jobs/updates?since=${lastPollTime}`);
-        const jobs = (await res.json()).data;
-        console.log(jobs);
+        const jobs = (await res.json()).data || [];
         if (jobs.length) {
             lastPollTime = new Date().toISOString();
             jobs.forEach(j => {
@@ -252,90 +604,60 @@
         const select = document.getElementById(id);
         const current = select.value;
         const unique = [...new Set(values.filter(Boolean))];
-
         select.innerHTML = `<option value="">All</option>` +
             unique.map(v => `<option value="${v}">${v}</option>`).join('');
-
         select.value = current;
     }
 
     function render() {
-        const handler = handlerFilter.value;
-        const status = statusFilter.value;
-        const category = categoryFilter.value;
-        const search = document.getElementById('search').value.toLowerCase();
-        const sortBy = document.getElementById('sortBy').value;
+        const handler  = document.getElementById('handlerFilter').value;
+        const status   = document.getElementById('statusFilter').value;
+        const category = document.getElementById('categoryFilter').value;
+        const search   = document.getElementById('search').value.toLowerCase();
+        const sortBy   = document.getElementById('sortBy').value;
 
         let jobs = [...allJobs];
-
-        if (handler) jobs = jobs.filter(j => j.jobHandler === handler);
-        if (status) jobs = jobs.filter(j => j.status === status);
+        if (handler)  jobs = jobs.filter(j => j.jobHandler  === handler);
+        if (status)   jobs = jobs.filter(j => j.status      === status);
         if (category) jobs = jobs.filter(j => j.jobCategory === category);
-
-        if (search) {
-            jobs = jobs.filter(j =>
-                JSON.stringify(j).toLowerCase().includes(search)
-            );
-        }
+        if (search)   jobs = jobs.filter(j => JSON.stringify(j).toLowerCase().includes(search));
 
         jobs.sort((a, b) => {
-            if (sortBy === 'createdAt')
-                return new Date(b.createdAt) - new Date(a.createdAt);
+            if (sortBy === 'createdAt') return new Date(b.createdAt) - new Date(a.createdAt);
             return (a[sortBy] || '').localeCompare(b[sortBy] || '');
         });
 
         const tbody = document.querySelector('#jobs tbody');
         tbody.innerHTML = '';
-
         jobs.forEach(job => {
             const row = document.createElement('tr');
-
             row.innerHTML = `
                 <td>${job.id}</td>
                 <td class="muted">${job.jobHandler}</td>
                 <td class="muted">${job.jobCategory}</td>
                 <td><span class="status ${job.status}">${job.status}</span></td>
-               <td>
-    <div class="history-toggle" onclick="toggleHistory(${job.id})">
-        ▾ View Details
-    </div>
-
-    <div id="history-${job.id}" style="display:none;">
-        <div class="history">
-            ${(job.history || []).map(h => `
-                <div class="history-item">
-                    <div class="history-stage ${h.status}">${h.status}</div>
-                    <div class="history-time">
-                        ${new Date(h.timestamp).toLocaleString()}
-                    </div>
-                    ${h.error ? `
-                        <div class="history-error">
-                            ${h.error}
+                <td>
+                    <div class="history-toggle" onclick="toggleHistory(${job.id})">▾ View Details</div>
+                    <div id="history-${job.id}" style="display:none;">
+                        <div class="history">
+                            ${(job.history || []).map(h => `
+                                <div class="history-item">
+                                    <div class="history-stage ${h.status}">${h.status}</div>
+                                    <div class="history-time">${new Date(h.timestamp).toLocaleString()}</div>
+                                    ${h.error ? `<div class="history-error">${h.error}</div>` : ''}
+                                </div>
+                            `).join('')}
                         </div>
-                    ` : ''}
-                </div>
-            `).join('')}
-        </div>
-
-        <pre style="margin-top:10px;">
-${JSON.stringify(job.data, null, 2)}
-        </pre>
-    </div>
-</td>
-
-                <td class="muted">${new Date(job.createdAt).toLocaleString()}</td>
-            `;
-
+                        <pre>${JSON.stringify(job.data, null, 2)}</pre>
+                    </div>
+                </td>
+                <td class="muted">${new Date(job.createdAt).toLocaleString()}</td>`;
             tbody.appendChild(row);
         });
     }
-function toggleHistory(id) {
-    const el = document.getElementById(`history-${id}`);
-    el.style.display = el.style.display === 'none' ? 'block' : 'none';
-}
 
-    function toggleJson(id) {
-        const el = document.getElementById(`json-${id}`);
+    function toggleHistory(id) {
+        const el = document.getElementById(`history-${id}`);
         el.style.display = el.style.display === 'none' ? 'block' : 'none';
     }
 
@@ -343,7 +665,218 @@ function toggleHistory(id) {
         .forEach(el => el.addEventListener('change', render));
 
     loadInitial();
-<!--    setInterval(pollUpdates, 3000);-->
+    setInterval(pollUpdates, 3000);
+
+    /* ─── AI Insights ────────────────────────────────────────────── */
+    let aiPanelOpen = false;
+
+    function toggleAiPanel() {
+        aiPanelOpen = !aiPanelOpen;
+        document.getElementById('aiBody').style.display = aiPanelOpen ? 'block' : 'none';
+        const chevron = document.getElementById('aiChevron');
+        chevron.classList.toggle('open', aiPanelOpen);
+    }
+
+    async function runInsights() {
+        const btn      = document.getElementById('aiBtn');
+        const loading  = document.getElementById('aiLoading');
+        const errorEl  = document.getElementById('aiError');
+        const resultsEl = document.getElementById('aiResults');
+
+        const body = {
+            hours:          parseInt(document.getElementById('aiHours').value)    || 24,
+            logLines:       parseInt(document.getElementById('aiLogLines').value) || 120,
+            jobLimit:       parseInt(document.getElementById('aiJobLimit').value) || 100,
+            question:       document.getElementById('aiQuestion').value.trim() || null,
+            includeRawContext: document.getElementById('aiRawContext').checked,
+        };
+
+        btn.disabled = true;
+        loading.style.display  = 'flex';
+        errorEl.style.display  = 'none';
+        resultsEl.style.display = 'none';
+        resultsEl.innerHTML     = '';
+
+        try {
+            const res = await fetch('/api/insights', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            });
+
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.message || `Server error ${res.status}`);
+            }
+
+            const payload = await res.json();
+            const data    = payload.data;
+
+            renderInsights(data, resultsEl);
+            resultsEl.style.display = 'flex';
+        } catch (ex) {
+            errorEl.textContent    = '⚠ ' + ex.message;
+            errorEl.style.display  = 'block';
+        } finally {
+            btn.disabled           = false;
+            loading.style.display  = 'none';
+        }
+    }
+
+    function renderInsights(d, container) {
+        container.innerHTML = '';
+
+        /* Summary */
+        const summaryEl = el('div', 'ai-summary', d.summary);
+        container.appendChild(summaryEl);
+
+        /* Answer (if question was asked) */
+        if (d.answer) {
+            const answerWrap = el('div', 'ai-answer');
+            answerWrap.innerHTML = `<div class="ai-answer-label">Answer</div>${esc(d.answer)}`;
+            container.appendChild(answerWrap);
+        }
+
+        /* Metrics row */
+        if (d.metrics) {
+            const m = d.metrics;
+            const statsRow = el('div', '');
+            statsRow.style.cssText = 'display:flex;gap:10px;flex-wrap:wrap;';
+
+            statsRow.innerHTML = `
+                <div class="metrics-stat">
+                    <div class="stat-num">${m.jobsAnalyzed}</div>
+                    <div class="stat-label">Jobs</div>
+                </div>
+                <div class="metrics-stat">
+                    <div class="stat-num">${m.logsAnalyzed}</div>
+                    <div class="stat-label">Log Lines</div>
+                </div>
+                <div class="metrics-stat">
+                    <div class="stat-num">${m.logLevels?.ERROR || 0}</div>
+                    <div class="stat-label" style="color:var(--red)">Errors</div>
+                </div>`;
+            container.appendChild(statsRow);
+
+            /* Status distribution chips */
+            if (m.jobsByStatus && Object.keys(m.jobsByStatus).length) {
+                const statusWrap = el('div', '');
+                statusWrap.innerHTML = `<div class="ai-section-title">Job Status Mix</div>`;
+                const grid = el('div', 'metrics-grid');
+                Object.entries(m.jobsByStatus)
+                    .sort((a, b) => b[1] - a[1])
+                    .forEach(([name, count]) => {
+                        const chip = el('span', 'metric-chip ' + statusChipColor(name),
+                            `${name}: ${count}`);
+                        grid.appendChild(chip);
+                    });
+                statusWrap.appendChild(grid);
+                container.appendChild(statusWrap);
+            }
+
+            /* Top errors */
+            if (m.topErrors && m.topErrors.length) {
+                const errWrap = el('div', '');
+                errWrap.innerHTML = `<div class="ai-section-title">Top Errors</div>`;
+                const grid = el('div', 'metrics-grid');
+                m.topErrors.forEach(e => {
+                    grid.appendChild(el('span', 'metric-chip red',
+                        `${esc(e.message)} (${e.count})`));
+                });
+                errWrap.appendChild(grid);
+                container.appendChild(errWrap);
+            }
+        }
+
+        /* Findings + Recommendations */
+        if ((d.findings && d.findings.length) || (d.recommendations && d.recommendations.length)) {
+            const cols = el('div', 'ai-cols');
+
+            if (d.findings && d.findings.length) {
+                const col = el('div', 'ai-col');
+                col.innerHTML = `<div class="ai-section-title">Findings</div>`;
+                const list = el('ul', 'ai-list findings');
+                d.findings.forEach(f => list.appendChild(el('li', '', f)));
+                col.appendChild(list);
+                cols.appendChild(col);
+            }
+
+            if (d.recommendations && d.recommendations.length) {
+                const col = el('div', 'ai-col');
+                col.innerHTML = `<div class="ai-section-title">Recommendations</div>`;
+                const list = el('ul', 'ai-list recommendations');
+                d.recommendations.forEach(r => list.appendChild(el('li', '', r)));
+                col.appendChild(list);
+                cols.appendChild(col);
+            }
+
+            container.appendChild(cols);
+        }
+
+        /* Source / model info */
+        if (d.source) {
+            const s = d.source;
+            const sourceEl = el('div', 'ai-source');
+            const modelClass = s.usedAiModel ? 'llm' : 'rules';
+            const modelLabel = s.usedAiModel ? `🧠 ${s.model}` : '⚙ Rule-based';
+            sourceEl.innerHTML = `
+                <span class="model-badge ${modelClass}">${modelLabel}</span>
+                <span>Generated ${new Date(s.generatedAt).toLocaleString()}</span>
+                <span>·</span>
+                <span>${s.hours}h window</span>
+                <span>·</span>
+                <span>${s.retrievedChunks} chunks retrieved</span>`;
+            container.appendChild(sourceEl);
+        }
+
+        /* Raw context (optional) */
+        if (d.context) {
+            const toggle = el('div', 'raw-context-toggle', '▾ Show raw context');
+            const body   = el('div', 'raw-context-body');
+            body.style.display = 'none';
+
+            if (d.context.retrievedChunks && d.context.retrievedChunks.length) {
+                const heading = el('div', 'ai-section-title', 'Retrieved Chunks');
+                body.appendChild(heading);
+                d.context.retrievedChunks.forEach(c => {
+                    const chunk = el('div', 'chunk-item',
+                        `[${c.sourceType}:${c.sourceName}] score=${c.score}\n${c.content}`);
+                    body.appendChild(chunk);
+                });
+            }
+
+            toggle.onclick = () => {
+                const open = body.style.display !== 'none';
+                body.style.display = open ? 'none' : 'block';
+                toggle.textContent = open ? '▾ Show raw context' : '▴ Hide raw context';
+            };
+
+            container.appendChild(toggle);
+            container.appendChild(body);
+        }
+    }
+
+    /* ── Helpers ── */
+    function el(tag, className, text) {
+        const node = document.createElement(tag);
+        if (className) node.className = className;
+        if (text !== undefined) node.textContent = text;
+        return node;
+    }
+
+    function esc(str) {
+        return String(str)
+            .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function statusChipColor(status) {
+        const map = {
+            PROCESSED: 'green', PROCESSING: 'blue', PUBLISHED: 'purple',
+            RETRY: 'amber', ERROR: 'red', DEAD: 'red', SCHEDULED: '',
+        };
+        return map[status] || '';
+    }
 </script>
 
 </body>
