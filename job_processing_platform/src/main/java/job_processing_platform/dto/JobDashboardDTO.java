@@ -14,6 +14,7 @@ public record JobDashboardDTO(
         JobCategory jobCategory,
         JobHandlerType jobHandler,
         Instant createdAt,
+        Instant updatedAt,
         Map<String, Object> data,
         List<JobHistoryDTO> history
 ) {

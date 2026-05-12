@@ -1,9 +1,12 @@
 package job_processing_platform.service;
 
 import jakarta.transaction.Transactional;
+import job_processing_platform.dto.DashboardJobsMetaDTO;
 import job_processing_platform.dto.JobDashboardDTO;
 import job_processing_platform.dto.JobHistoryDTO;
 import job_processing_platform.dto.JobMessage;
+import job_processing_platform.dto.JobQueryOptionsDTO;
+import job_processing_platform.dto.PaginatedJobsDTO;
 import job_processing_platform.entity.Job;
 import job_processing_platform.entity.JobStateHistory;
 import job_processing_platform.enums.JobHandlerType;
@@ -16,6 +19,7 @@ import job_processing_platform.repository.JobStatusHistoryRepository;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -141,15 +145,67 @@ public class JobService {
 
     @Transactional()
     public List<JobDashboardDTO> getJobsForDashboard() {
-        List<Job> jobs = jobRepository.findAllByOrderByCreatedAtDesc();
+        return getJobsForDashboard(JobQueryOptionsDTO.empty(), null);
+    }
+
+    @Transactional
+    public List<JobDashboardDTO> getJobsForDashboard(JobQueryOptionsDTO options, Instant since) {
+        List<Job> jobs = jobRepository.findWithOptions(options, since);
 
         if (jobs.isEmpty()) {
             return List.of();
         }
 
-        List<Long> jobIds = jobs.stream()
-                .map(Job::getId)
-                .toList();
+        return buildDashboardDTOs(jobs);
+    }
+
+    @Transactional
+    public PaginatedJobsDTO getJobsForDashboardPaginated(JobQueryOptionsDTO options, int page, int limit) {
+        JobQueryOptionsDTO pagedOptions = new JobQueryOptionsDTO(
+                options.handler(),
+                options.status(),
+                options.category(),
+                options.search(),
+                options.sortBy(),
+                options.sortOrder(),
+                limit,
+                (page - 1) * limit
+        );
+
+        List<Job> jobs = jobRepository.findWithOptions(pagedOptions, null);
+        long total = jobRepository.countWithOptions(options, null);
+        return buildPaginatedResult(jobs, total, page, limit);
+    }
+
+    @Transactional
+    public PaginatedJobsDTO getUpdatedJobsPaginated(Instant since, JobQueryOptionsDTO options, int page, int limit) {
+        JobQueryOptionsDTO pagedOptions = new JobQueryOptionsDTO(
+                options.handler(),
+                options.status(),
+                options.category(),
+                options.search(),
+                options.sortBy(),
+                options.sortOrder(),
+                limit,
+                (page - 1) * limit
+        );
+
+        List<Job> jobs = jobRepository.findWithOptions(pagedOptions, since);
+        long total = jobRepository.countWithOptions(options, since);
+        return buildPaginatedResult(jobs, total, page, limit);
+    }
+
+    @Transactional
+    public Optional<JobDashboardDTO> getJobDashboardById(long jobId) {
+        return jobRepository.findById(jobId).map(job -> buildDashboardDTOs(List.of(job)).get(0));
+    }
+
+    public Optional<Job> getJobById(long jobId) {
+        return jobRepository.findById(jobId);
+    }
+
+    private List<JobDashboardDTO> buildDashboardDTOs(List<Job> jobs) {
+        List<Long> jobIds = jobs.stream().map(Job::getId).toList();
 
         List<JobStateHistory> histories =
                 jobStateHistoryRepository.findByJobIdInOrderByCreatedAtAsc(jobIds);
@@ -175,13 +231,17 @@ public class JobService {
                         job.getJobCategory(),
                         job.getJobHandler(),
                         job.getCreatedAt(),
+                        job.getUpdatedAt(),
                         job.getData(),
                         historyByJobId.getOrDefault(job.getId(), List.of())
                 ))
                 .toList();
     }
 
-    public Optional<Job> getJobById(long jobId) {
-        return jobRepository.findById(jobId);
+    private PaginatedJobsDTO buildPaginatedResult(List<Job> jobs, long total, int page, int limit) {
+        List<JobDashboardDTO> items = jobs.isEmpty() ? List.of() : buildDashboardDTOs(jobs);
+        int totalPages = (int) Math.max(1, Math.ceil((double) total / limit));
+        DashboardJobsMetaDTO meta = new DashboardJobsMetaDTO(total, page, limit, totalPages, page < totalPages);
+        return new PaginatedJobsDTO(items, meta);
     }
 }
