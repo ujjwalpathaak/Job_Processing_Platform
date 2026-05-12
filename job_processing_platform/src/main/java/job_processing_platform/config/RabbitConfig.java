@@ -6,6 +6,7 @@ import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFacto
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,8 +15,16 @@ public class RabbitConfig {
 
     private final RabbitProperties props;
 
+    @Value("${job.platform.rabbit.log-rag.queue:log.rag.queue}")
+    private String logRagQueueName;
+
     public RabbitConfig(RabbitProperties props) {
         this.props = props;
+    }
+
+    @Bean
+    public Queue logRagQueue() {
+        return QueueBuilder.durable(logRagQueueName).build();
     }
 
     @Bean
