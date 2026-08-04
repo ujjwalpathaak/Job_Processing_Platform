@@ -8,6 +8,7 @@ public class AiProperties {
     private String apiKey;
     private String baseUrl = "https://api.openai.com/v1";
     private String model = "gpt-4o-mini";
+    private String embeddingModel = "text-embedding-3-small";
     private String systemPrompt;
 
     public String getApiKey() {
@@ -32,6 +33,14 @@ public class AiProperties {
 
     public void setModel(String model) {
         this.model = model;
+    }
+
+    public String getEmbeddingModel() {
+        return embeddingModel;
+    }
+
+    public void setEmbeddingModel(String embeddingModel) {
+        this.embeddingModel = embeddingModel;
     }
 
     public String getSystemPrompt() {

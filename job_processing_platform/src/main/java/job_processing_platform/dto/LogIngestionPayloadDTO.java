@@ -7,6 +7,7 @@ public record LogIngestionPayloadDTO(
         String message,
         String event,
         String error,
-        Instant timestamp
+        Instant timestamp,
+        String requestId
 ) {
 }

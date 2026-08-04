@@ -56,11 +56,14 @@ public class AiInsightsService {
     private final AiProperties aiProperties;
     private final ObjectMapper objectMapper;
     private final HttpClient httpClient;
+    private final RagEmbeddingService ragEmbeddingService;
 
-    public AiInsightsService(JobService jobService, AiProperties aiProperties, ObjectMapper objectMapper) {
+    public AiInsightsService(JobService jobService, AiProperties aiProperties, ObjectMapper objectMapper,
+                            RagEmbeddingService ragEmbeddingService) {
         this.jobService = jobService;
         this.aiProperties = aiProperties;
         this.objectMapper = objectMapper;
+        this.ragEmbeddingService = ragEmbeddingService;
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(30))
                 .build();
@@ -356,6 +359,17 @@ public class AiInsightsService {
         all.addAll(buildJobChunks(jobs));
         all.addAll(buildLogChunks(logs));
         DOC_SOURCES.forEach(rel -> all.addAll(chunkDocumentText(Paths.get(workDir, rel))));
+
+        String embeddingJson = ragEmbeddingService.buildEmbedding(retrievalQuery);
+        List<RagEmbeddingMatchDTO> embeddingMatches = ragEmbeddingService.findSimilar(embeddingJson, MAX_RETRIEVED_CHUNKS);
+        embeddingMatches.forEach(match -> all.add(new RagChunk(
+                "emb-" + match.id(),
+                "emb",
+                match.sourceName(),
+                match.content(),
+                0,
+                normalizeText(match.content())
+        )));
 
         List<RagChunk> scored = all.stream()
                 .map(chunk -> chunk.withScore(scoreChunk(retrievalQuery, queryTokens, chunk)))
