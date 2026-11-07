@@ -36,8 +36,14 @@ Open `http://localhost:3000` for the dashboard.
 - `GET /jobs` — list / filter / paginate
 - `GET /jobs/updates?since=<ISO>` — poll updates
 - `GET /jobs/{id}` — job detail
-- `POST /api/insights` — AI / rule-based insights
+- `POST /api/insights` — hybrid RAG diagnostics (optional `jobId`, `question`, `hours`)
 - `GET /health` — health check
+
+### AI / logging notes
+
+- Pino logs to stdout + `logs/`; WARN/ERROR and job/handler lifecycle events batch via Redis → Rabbit → pgvector.
+- Insights use job-scoped hybrid retrieval (keyword + vector RRF), Gemini JSON when keyed, otherwise rule-based fallbacks.
+- Hash embeddings are not stored in the searchable index (Gemini-only vectors).
 
 ## Processes
 

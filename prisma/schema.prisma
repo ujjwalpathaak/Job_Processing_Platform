@@ -59,14 +59,20 @@ model JobStateHistory {
 }
 
 model RagEmbedding {
-  id         BigInt   @id @default(autoincrement())
-  sourceType String   @map("source_type")
-  sourceName String   @map("source_name")
-  content    String   @db.VarChar(4000)
-  requestId  String?  @map("request_id")
-  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+  id             BigInt    @id @default(autoincrement())
+  sourceType     String    @map("source_type")
+  sourceName     String    @map("source_name")
+  content        String    @db.VarChar(4000)
+  requestId      String?   @map("request_id")
+  jobId          BigInt?   @map("job_id")
+  level          String?   @db.VarChar(16)
+  handler        String?   @db.VarChar(64)
+  embeddingModel String?   @map("embedding_model") @db.VarChar(64)
+  createdAt      DateTime  @default(now()) @db.Timestamptz(3)
   // Stored via raw SQL as vector(768); Prisma cannot map pgvector natively.
-  embedding  Unsupported("vector(768)")
+  embedding      Unsupported("vector(768)")
 
+  @@index([jobId], map: "idx_rag_job_id")
+  @@index([createdAt], map: "idx_rag_created_at")
   @@map("rag_embeddings")
 }
