@@ -1,4 +1,5 @@
 import { JobCategory, JobHandlerType } from '../models/enums.js';
+import { log } from '../services/logService.js';
 import type { JobHandler } from './types.js';
 
 function sleep(ms: number) {
@@ -10,7 +11,8 @@ export const crmSyncHandler: JobHandler = {
   category: () => JobCategory.EXTERNAL,
   retries: () => 2,
   backoff: () => ['5s', '60s'],
-  process: async (_message) => {
+  process: async (message) => {
+    log.info('event=handler.crm.sync_started jobId={}', message.jobId);
     await sleep(300);
     throw new Error('CRM sync timed out');
   },

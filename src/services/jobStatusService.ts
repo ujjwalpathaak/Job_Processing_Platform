@@ -1,6 +1,7 @@
 import { prisma } from '../models/db.js';
 import { ALLOWED_TRANSITIONS, type JobStatus } from '../models/enums.js';
 import type { Job } from '@prisma/client';
+import { log } from './logService.js';
 
 export async function updateJobStatus(
   job: Job,
@@ -22,7 +23,11 @@ export async function updateJobStatus(
   });
 
   if (result.count === 0) {
-    console.log(`Skipping status update because job ${job.id} moved from ${expected} already`);
+    log.info(
+      'event=job.status_skip jobId={} expected={}',
+      Number(job.id),
+      expected,
+    );
     const current = await prisma.job.findUniqueOrThrow({ where: { id: job.id } });
     return current;
   }

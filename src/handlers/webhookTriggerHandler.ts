@@ -1,4 +1,5 @@
 import { JobCategory, JobHandlerType } from '../models/enums.js';
+import { log } from '../services/logService.js';
 import type { JobHandler } from './types.js';
 
 function sleep(ms: number) {
@@ -15,6 +16,6 @@ export const webhookTriggerHandler: JobHandler = {
     if (Math.random() < 0.35) {
       throw new Error('Webhook returned 502');
     }
-    console.log(`Webhook triggered for job ${message.jobId}`);
+    log.info('event=handler.webhook.triggered jobId={}', message.jobId);
   },
 };

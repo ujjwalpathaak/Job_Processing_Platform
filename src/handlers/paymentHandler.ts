@@ -1,4 +1,5 @@
 import { JobCategory, JobHandlerType } from '../models/enums.js';
+import { log } from '../services/logService.js';
 import type { JobHandler } from './types.js';
 
 export const paymentHandler: JobHandler = {
@@ -10,6 +11,6 @@ export const paymentHandler: JobHandler = {
     if (Math.random() < 0.25) {
       throw new Error('Payment gateway error');
     }
-    console.log(`Payment processed for job ${message.jobId}`);
+    log.info('event=handler.payment.processed jobId={}', message.jobId);
   },
 };

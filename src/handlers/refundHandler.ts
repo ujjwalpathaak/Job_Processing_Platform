@@ -1,4 +1,5 @@
 import { JobCategory, JobHandlerType } from '../models/enums.js';
+import { log } from '../services/logService.js';
 import type { JobHandler } from './types.js';
 
 export const refundHandler: JobHandler = {
@@ -10,6 +11,6 @@ export const refundHandler: JobHandler = {
     if (Math.random() < 0.25) {
       throw new Error('Refund gateway error');
     }
-    console.log(`Refund processed for job ${message.jobId}`);
+    log.info('event=handler.refund.processed jobId={}', message.jobId);
   },
 };

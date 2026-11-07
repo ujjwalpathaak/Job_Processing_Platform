@@ -1,4 +1,5 @@
 import { JobCategory, JobHandlerType } from '../models/enums.js';
+import { log } from '../services/logService.js';
 import type { JobHandler } from './types.js';
 
 function sleep(ms: number) {
@@ -15,6 +16,6 @@ export const reportGenerationHandler: JobHandler = {
     if (Math.random() < 0.2) {
       throw new Error('Report generation failed');
     }
-    console.log(`Report generated for job ${message.jobId}`);
+    log.info('event=handler.report.generated jobId={}', message.jobId);
   },
 };

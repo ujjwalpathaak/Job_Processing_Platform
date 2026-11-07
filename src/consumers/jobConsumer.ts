@@ -5,6 +5,8 @@ import { exchangeForCategory, getRabbitChannel, queueForCategory } from '../help
 import { getRetryCount, RETRY_HEADER, shouldRetry } from '../helpers/retry.js';
 import type { JobMessage } from '../models/jobMessage.js';
 import { JobCategory, JobStatus } from '../models/enums.js';
+import { flushJobBatch } from '../services/logBatchingService.js';
+import { log, runWithLogContext } from '../services/logService.js';
 import { getJobById } from '../services/jobService.js';
 import { updateJobStatus } from '../services/jobStatusService.js';
 
@@ -20,53 +22,79 @@ async function handleJobMessage(ch: Channel, msg: ConsumeMessage): Promise<void>
     return;
   }
 
-  const handler = getHandler(job.jobHandler);
-  job = await updateJobStatus(job, JobStatus.PROCESSING);
-  console.log(`${job.id} - STARTING TO PROCESS - consumer: ${jobMessage.jobCategory}`);
+  const jobLogger = log.child({
+    jobId: Number(job.id),
+    handler: job.jobHandler,
+    category: jobMessage.jobCategory,
+  });
 
-  try {
-    await processWithValidation(jobMessage);
-    await updateJobStatus(job, JobStatus.PROCESSED);
-    ch.ack(msg);
-    console.log(`${job.id} - FINISHED PROCESSING - consumer: ${jobMessage.jobCategory}`);
-  } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : String(err);
-    job = await updateJobStatus(job, JobStatus.ERROR, errorMessage);
-    console.log(`${job.id} - FAILED TO PROCESS - consumer: ${jobMessage.jobCategory}`);
+  await runWithLogContext(
+    {
+      jobId: Number(job.id),
+      handler: job.jobHandler,
+      category: jobMessage.jobCategory,
+    },
+    async () => {
+      const handler = getHandler(job!.jobHandler);
+      job = await updateJobStatus(job!, JobStatus.PROCESSING);
+      jobLogger.info('event=job.process_started consumer={}', jobMessage.jobCategory);
 
-    const retryCount = getRetryCount(msg);
-    if (!shouldRetry(handler.retries(), retryCount)) {
-      const exchange = exchangeForCategory(jobMessage.jobCategory);
-      const queueConfig = queueForCategory(jobMessage.jobCategory);
-      ch.publish(exchange, queueConfig.dlqRoutingKey, msg.content, {
-        contentType: 'application/json',
-        persistent: true,
-      });
-      ch.ack(msg);
-      await updateJobStatus(job, JobStatus.DEAD, errorMessage);
-      console.log(`${job.id} - MARKED AS DEAD - consumer: ${jobMessage.jobCategory}`);
-      return;
-    }
+      try {
+        await processWithValidation(jobMessage);
+        await updateJobStatus(job, JobStatus.PROCESSED);
+        ch.ack(msg);
+        jobLogger.info('event=job.process_finished consumer={}', jobMessage.jobCategory);
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        job = await updateJobStatus(job, JobStatus.ERROR, errorMessage);
+        jobLogger.error('event=job.process_failed consumer={} reason={}', jobMessage.jobCategory, errorMessage);
 
-    const delayKey = handler.backoff()[retryCount];
-    const retry = rabbitTopology.retries[delayKey as keyof typeof rabbitTopology.retries];
-    if (!retry) {
-      ch.nack(msg, false, false);
-      return;
-    }
+        const retryCount = getRetryCount(msg);
+        if (!shouldRetry(handler.retries(), retryCount)) {
+          const exchange = exchangeForCategory(jobMessage.jobCategory);
+          const queueConfig = queueForCategory(jobMessage.jobCategory);
+          ch.publish(exchange, queueConfig.dlqRoutingKey, msg.content, {
+            contentType: 'application/json',
+            persistent: true,
+          });
+          ch.ack(msg);
+          await updateJobStatus(job, JobStatus.DEAD, errorMessage);
+          jobLogger.error('event=job.dead_lettered consumer={}', jobMessage.jobCategory);
+          return;
+        }
 
-    ch.sendToQueue(retry.queue, msg.content, {
-      contentType: 'application/json',
-      persistent: true,
-      headers: {
-        ...msg.properties.headers,
-        [RETRY_HEADER]: retryCount + 1,
-      },
-    });
-    ch.ack(msg);
-    await updateJobStatus(job, JobStatus.RETRY, errorMessage);
-    console.log(`${job.id} - RETRY - consumer: ${jobMessage.jobCategory}, queue: ${retry.queue}`);
-  }
+        const delayKey = handler.backoff()[retryCount];
+        const retry = rabbitTopology.retries[delayKey as keyof typeof rabbitTopology.retries];
+        if (!retry) {
+          ch.nack(msg, false, false);
+          return;
+        }
+
+        ch.sendToQueue(retry.queue, msg.content, {
+          contentType: 'application/json',
+          persistent: true,
+          headers: {
+            ...msg.properties.headers,
+            [RETRY_HEADER]: retryCount + 1,
+          },
+        });
+        ch.ack(msg);
+        await updateJobStatus(job, JobStatus.RETRY, errorMessage);
+        jobLogger.warn(
+          'event=job.retry_scheduled consumer={} queue={}',
+          jobMessage.jobCategory,
+          retry.queue,
+        );
+      } finally {
+        await flushJobBatch(Number(job!.id)).catch((flushErr) => {
+          jobLogger.error(
+            'event=log.batch.flush_failed reason={}',
+            flushErr instanceof Error ? flushErr.message : flushErr,
+          );
+        });
+      }
+    },
+  );
 }
 
 export async function startCategoryConsumers(): Promise<void> {
@@ -78,7 +106,11 @@ export async function startCategoryConsumers(): Promise<void> {
     await ch.consume(queue, (msg) => {
       if (!msg) return;
       void handleJobMessage(ch, msg).catch((err) => {
-        console.error(`Consumer error on ${queue}:`, err);
+        log.error(
+          'event=job.consumer_error queue={} reason={}',
+          queue,
+          err instanceof Error ? err.message : err,
+        );
         try {
           ch.nack(msg, false, false);
         } catch {
@@ -86,7 +118,7 @@ export async function startCategoryConsumers(): Promise<void> {
         }
       });
     });
-    console.log(`Listening on ${queue}`);
+    log.info('event=worker.listening queue={}', queue);
   }
 }
 
@@ -105,9 +137,12 @@ export async function startRetryRouter(): Promise<void> {
       });
       ch.ack(msg);
     } catch (err) {
-      console.error('Retry router failed:', err);
+      log.error(
+        'event=job.retry_router_failed reason={}',
+        err instanceof Error ? err.message : err,
+      );
       ch.nack(msg, false, false);
     }
   });
-  console.log(`Listening on ${rabbitTopology.retryRouteQueue}`);
+  log.info('event=worker.listening queue={}', rabbitTopology.retryRouteQueue);
 }
