@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum JobStatus {
+  SCHEDULED
+  PUBLISHED
+  PROCESSING
+  PROCESSED
+  RETRY
+  ERROR
+  DEAD
+}
+
+enum JobCategory {
+  STANDARD
+  CRITICAL
+  EXTERNAL
+}
+
+enum JobHandlerType {
+  EMAIL
+  REPORT_GENERATION
+  NOTIFICATION_CLEANUP
+  WEBHOOK_TRIGGER
+  CRM_SYNC
+  PAYMENT
+  REFUND
+}
+
+model Job {
+  id           BigInt         @id @default(autoincrement())
+  createdAt    DateTime       @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+  status       JobStatus
+  jobCategory  JobCategory
+  jobHandler   JobHandlerType
+  errorMessage String?        @map("error_message") @db.Text
+  data         Json
+
+  @@map("jobs")
+}
+
+model JobStateHistory {
+  id           BigInt     @id @default(autoincrement())
+  jobId        BigInt     @map("job_id")
+  status       JobStatus
+  createdAt    DateTime   @default(now()) @db.Timestamptz(3)
+  errorMessage String?    @map("error_message") @db.Text
+
+  @@index([jobId], map: "idx_job_id")
+  @@index([status], map: "idx_job_status")
+  @@map("job_state_history")
+}
+
+model RagEmbedding {
+  id         BigInt   @id @default(autoincrement())
+  sourceType String   @map("source_type")
+  sourceName String   @map("source_name")
+  content    String   @db.VarChar(4000)
+  requestId  String?  @map("request_id")
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+  // Stored via raw SQL as vector(768); Prisma cannot map pgvector natively.
+  embedding  Unsupported("vector(768)")
+
+  @@map("rag_embeddings")
+}
